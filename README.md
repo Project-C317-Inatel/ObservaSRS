@@ -20,7 +20,7 @@ evitando que o desenvolvimento do frontend e do backend interfiram um no outro.
 
 - Node.js 22 ou superior
 - npm 10 ou superior
-- PostgreSQL local, necessario a partir da proxima etapa
+- PostgreSQL local
 
 ### Executar a API
 
@@ -37,6 +37,3 @@ funcionando, acesse `GET http://localhost:3333/status`.
 Consulte [back/README.md](back/README.md) para ver os demais comandos.
 
 ## Frontend
-
-A pasta `front/` esta reservada para a aplicacao web. A tecnologia e os comandos do frontend
-serao documentados pelo responsavel por essa parte do projeto.
