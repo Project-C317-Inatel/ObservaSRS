@@ -31,14 +31,12 @@ INATEL | C317 | 2026.2
 | Frontend     | React, TypeScript, Tailwind CSS   |
 | Backend      | Node.js, Express, TypeScript, Zod |
 | Persistência | PostgreSQL, Prisma                |
-| Automação    | GitHub Actions                    |
 
 ## Estrutura do repositório
 
 ```text
 ObservaSRS/
 |-- .github/
-|   |-- workflows/ci.yml
 |   `-- pull_request_template.md
 |-- docs/
 |   |-- milestones/
