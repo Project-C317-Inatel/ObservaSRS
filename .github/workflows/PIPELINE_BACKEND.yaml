@@ -1,0 +1,47 @@
+
+name: pipe_back
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/PIPELINE_BACKEND.yaml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/PIPELINE_BACKEND.yaml"
+
+jobs:
+  build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/observasrs?schema=public
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar tipos
+        run: npm run typecheck
+
+      - name: Compilar aplicação
+        run: npm run build
