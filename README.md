@@ -55,7 +55,7 @@ evitando que o desenvolvimento do frontend e do backend interfiram um no outro.
 ### Executar a API
 
 ```powershell
-cd back
+cd backend
 npm ci
 Copy-Item .env.example .env
 npm run dev
