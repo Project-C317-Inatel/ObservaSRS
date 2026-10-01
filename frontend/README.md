@@ -1,6 +1,7 @@
 # Frontend ObservaSRS
 
-Aplicação web do ObservaSRS, construída com React, TypeScript, Vite e Tailwind CSS.
+Aplicação web do ObservaSRS, construída com React, TypeScript, Vite e Tailwind CSS e mantida
+separadamente da API e da persistência localizadas em `backend/`.
 
 ## Preparação
 
@@ -22,7 +23,14 @@ npm run format:check # verifica a formatação
 ## Estrutura
 
 ```text
-src/
-|-- components/ui/   componentes base (Button etc.)
-`-- index.css        paleta de cores e estilos globais
+frontend/
+`-- src/
+    |-- components/
+    |   |-- layout/   cabeçalho, rodapé e estrutura das páginas
+    |   `-- ui/       componentes base (Button etc.)
+    |-- features/     funcionalidades do sistema
+    |-- pages/        páginas da aplicação
+    |-- services/     comunicação com a API
+    |-- types/        tipos compartilhados
+    `-- index.css     paleta de cores e estilos globais
 ```
