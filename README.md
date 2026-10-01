@@ -64,13 +64,13 @@ npm run dev
 A API ficará disponível em `http://localhost:3333`. Para confirmar que o ambiente está
 funcionando, acesse `GET http://localhost:3333/status`.
 
-Consulte [back/README.md](back/README.md) para ver os demais comandos.
+Consulte [backend/README.md](backend/README.md) para ver os demais comandos.
 
 ## Frontend
 
 O frontend está localizado na pasta frontend/ e utiliza React, TypeScript e Tailwind CSS.
 A aplicação web ainda está em configuração. As instruções de execução ficarão em
-[front/README.md](front/README.md).
+[frontend/README.md](frontend/README.md).
 
 ## Links
 
