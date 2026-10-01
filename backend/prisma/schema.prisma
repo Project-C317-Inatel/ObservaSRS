@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PapelAdmin {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+enum StatusContaAdmin {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+model UsuarioAdmin {
+  id              String           @id @default(uuid())
+  nome            String           @db.VarChar(120)
+  email           String           @unique @db.VarChar(160)
+  senhaHash       String           @map("senha_hash") @db.VarChar(255)
+  papel           PapelAdmin       @default(ADMIN)
+  status          StatusContaAdmin @default(PENDENTE)
+  ativo           Boolean          @default(false)
+  avaliadoEm      DateTime?        @map("avaliado_em")
+  avaliadoPorId   String?          @map("avaliado_por_id")
+  criadoEm        DateTime         @default(now()) @map("criado_em")
+  atualizadoEm    DateTime         @updatedAt @map("atualizado_em")
+  avaliadoPor     UsuarioAdmin?    @relation("AvaliacaoContasAdmin", fields: [avaliadoPorId], references: [id], onDelete: SetNull)
+  contasAvaliadas UsuarioAdmin[]   @relation("AvaliacaoContasAdmin")
+
+  @@index([status])
+  @@index([avaliadoPorId])
+  @@map("user_admin")
+}

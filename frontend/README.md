@@ -1,7 +1,18 @@
 # Frontend ObservaSRS
 
-Esta pasta esta reservada para a aplicacao web do ObservaSRS.
+Aplicacao web do ObservaSRS, mantida separadamente da API e da persistencia localizadas em
+`backend/`.
 
-O responsavel pelo frontend pode inicializar o projeto aqui e manter suas dependencias,
-configuracoes e instrucoes separadas do backend.
-
+```text
+frontend/
+|-- public/
+`-- src/
+    |-- assets/
+    |-- components/
+    |   |-- layout/
+    |   `-- ui/
+    |-- features/
+    |-- pages/
+    |-- services/
+    `-- types/
+```
