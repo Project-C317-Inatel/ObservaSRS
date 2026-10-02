@@ -1,4 +1,5 @@
 import { Button } from './components/ui/Button';
+import { LoginForm } from './components/forms/LoginForm';
 
 export default function App() {
   return (
@@ -11,14 +12,17 @@ export default function App() {
           </p>
         </div>
       </header>
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:p-6">
-        <Button className="w-full sm:w-auto">Primário</Button>
-        <Button className="w-full sm:w-auto" variant="secondary">
-          Secundário
-        </Button>
-        <Button className="w-full sm:w-auto" variant="ghost">
-          Ghost
-        </Button>
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
+        <LoginForm />
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <Button className="w-full sm:w-auto">Primário</Button>
+          <Button className="w-full sm:w-auto" variant="secondary">
+            Secundário
+          </Button>
+          <Button className="w-full sm:w-auto" variant="ghost">
+            Ghost
+          </Button>
+        </div>
       </section>
     </main>
   );
