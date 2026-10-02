@@ -1,18 +1,36 @@
 # Frontend ObservaSRS
 
-Aplicacao web do ObservaSRS, mantida separadamente da API e da persistencia localizadas em
-`backend/`.
+Aplicação web do ObservaSRS, construída com React, TypeScript, Vite e Tailwind CSS e mantida
+separadamente da API e da persistência localizadas em `backend/`.
+
+## Preparação
+
+```powershell
+npm ci
+```
+
+## Comandos
+
+```powershell
+npm run dev          # inicia o servidor de desenvolvimento em http://localhost:5173
+npm run build        # gera a aplicação em dist/
+npm run preview      # serve o build gerado
+npm run typecheck    # verifica os tipos TypeScript
+npm run lint         # verifica a qualidade do código
+npm run format:check # verifica a formatação
+```
+
+## Estrutura
 
 ```text
 frontend/
-|-- public/
 `-- src/
-    |-- assets/
     |-- components/
-    |   |-- layout/
-    |   `-- ui/
-    |-- features/
-    |-- pages/
-    |-- services/
-    `-- types/
+    |   |-- layout/   cabeçalho, rodapé e estrutura das páginas
+    |   `-- ui/       componentes base (Button etc.)
+    |-- features/     funcionalidades do sistema
+    |-- pages/        páginas da aplicação
+    |-- services/     comunicação com a API
+    |-- types/        tipos compartilhados
+    `-- index.css     paleta de cores e estilos globais
 ```
