@@ -1,4 +1,9 @@
 coverage/
+reports/
+.vitest/
+.agents/
+.claude/
+.windsurf/
 dist/
 node_modules/
 package-lock.json
