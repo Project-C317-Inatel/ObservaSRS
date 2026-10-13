@@ -1,4 +1,5 @@
 import { Button } from './components/ui/Button';
+import { ColetaAutonomaForm } from './components/forms/ColetaAutonomaForm';
 import { LoginForm } from './components/forms/LoginForm';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
         </div>
       </header>
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
+        <ColetaAutonomaForm />
         <LoginForm />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <Button className="w-full sm:w-auto">Primário</Button>
