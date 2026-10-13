@@ -57,3 +57,16 @@ export interface ApiError {
   message: string;
   details?: Record<string, unknown>[];
 }
+
+export interface ColetaAutonomaRequest {
+  nomeEstabelecimento: string;
+  cnpjCadastur: string;
+  periodoReferencia: string;
+  leitosOcupados: number;
+  origemVisitantes: string;
+}
+
+export interface ColetaAutonomaResponse {
+  message: string;
+  coleta: { id: string } & ColetaAutonomaRequest;
+}

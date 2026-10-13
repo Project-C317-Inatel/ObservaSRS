@@ -2,6 +2,8 @@ export type {
   AccessRequest,
   ApiError,
   ApiUser,
+  ColetaAutonomaRequest,
+  ColetaAutonomaResponse,
   EvaluationResponse,
   ListAccessRequestsResponse,
   LoginRequest,
@@ -12,4 +14,10 @@ export type {
   StatusResponse,
   UserRole,
 } from './api';
-export type { AsyncStatus, LoginErrors, LoginField } from './forms';
+export type {
+  AsyncStatus,
+  ColetaAutonomaErrors,
+  ColetaAutonomaField,
+  LoginErrors,
+  LoginField,
+} from './forms';
