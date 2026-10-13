@@ -65,7 +65,7 @@ evitando que o desenvolvimento do frontend e do backend interfiram um no outro.
 
 ### Requisitos
 
-- Node.js 22 ou superior
+- Node.js 22 ou superior (22.12 ou superior para os testes)
 - npm 10 ou superior
 - PostgreSQL local
 
@@ -110,6 +110,24 @@ Consulte [backend/README.md](backend/README.md) para ver os demais comandos.
 
 O passo a passo completo do PostgreSQL, pgAdmin, Prisma e Swagger está em
 [docs/configuracao-postgresql.md](docs/configuracao-postgresql.md).
+
+### Testes de Login
+
+Na pasta `backend/`, execute:
+
+```powershell
+npm ci
+npm test
+```
+
+A bateria utiliza Vitest e Supertest e apresenta exatamente cinco testes de login,
+sessão e permissões administrativas. O Prisma é simulado, permitindo executar os testes
+sem iniciar a API ou conectar ao PostgreSQL.
+
+O relatório HTML é gerado em `backend/reports/tests/index.html` e pode ser aberto diretamente
+no navegador. Os arquivos gerados não são incluídos no Git.
+
+Consulte [docs/testes-login.md](docs/testes-login.md) para ver os cenários e as instruções completas.
 
 ## Frontend
 
