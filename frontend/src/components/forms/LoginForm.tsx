@@ -5,10 +5,13 @@ import { Button } from '../ui/Button';
 
 export interface LoginFormProps {
   title?: string;
+  onSuccess?: () => void;
 }
 
-export function LoginForm({ title = 'Acesso administrativo' }: LoginFormProps) {
-  const { values, errors, status, feedback, updateField, submit } = useLoginForm();
+export function LoginForm({ title = 'Acesso administrativo', onSuccess }: LoginFormProps) {
+  const { values, errors, status, feedback, updateField, submit } = useLoginForm(() =>
+    onSuccess?.(),
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
