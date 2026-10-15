@@ -10,7 +10,9 @@ import type { AccessRequest, RequestStatus } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { useAdminSession } from '../../hooks/useAdminSession';
 
-const statuses: RequestStatus[] = ['PENDENTE', 'APROVADO', 'REJEITADO'];
+type AdminFilter = 'TODOS' | RequestStatus;
+
+const filters: AdminFilter[] = ['TODOS', 'PENDENTE', 'APROVADO', 'REJEITADO'];
 
 function formatDate(value: string | null) {
   if (!value) return 'Não informado';
@@ -19,8 +21,17 @@ function formatDate(value: string | null) {
   );
 }
 
+function filterLabel(filter: AdminFilter) {
+  return {
+    TODOS: 'Todos',
+    PENDENTE: 'Pendente',
+    APROVADO: 'Aprovado',
+    REJEITADO: 'Rejeitado',
+  }[filter];
+}
+
 function statusLabel(status: RequestStatus) {
-  return { PENDENTE: 'Pendente', APROVADO: 'Aprovado', REJEITADO: 'Rejeitado' }[status];
+  return filterLabel(status);
 }
 
 function getErrorMessage(error: unknown) {
@@ -29,10 +40,17 @@ function getErrorMessage(error: unknown) {
 
 export interface AdminPageProps {
   onLogout: () => void;
+  onUnauthenticated: () => void;
 }
 
-export function AdminPage({ onLogout }: AdminPageProps) {
+export function AdminPage({ onLogout, onUnauthenticated }: AdminPageProps) {
   const session = useAdminSession();
+
+  useEffect(() => {
+    if (session.status === 'unauthenticated') {
+      onUnauthenticated();
+    }
+  }, [onUnauthenticated, session.status]);
 
   if (session.status === 'checking') return <StatusPanel message="Validando sua sessão..." />;
   if (session.status === 'unauthenticated') {
@@ -58,7 +76,7 @@ export function AdminPage({ onLogout }: AdminPageProps) {
 }
 
 function AdminContent({ userName, onLogout }: { userName: string; onLogout: () => void }) {
-  const [filter, setFilter] = useState<RequestStatus>('PENDENTE');
+  const [filter, setFilter] = useState<AdminFilter>('PENDENTE');
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [selected, setSelected] = useState<AccessRequest | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +87,7 @@ function AdminContent({ userName, onLogout }: { userName: string; onLogout: () =
     setLoading(true);
     setError(null);
     try {
-      const response = await listAccessRequests(filter);
+      const response = await listAccessRequests(filter === 'TODOS' ? undefined : filter);
       setRequests(response.solicitacoes);
     } catch (requestError: unknown) {
       setRequests([]);
@@ -133,11 +151,11 @@ function AdminContent({ userName, onLogout }: { userName: string; onLogout: () =
             <select
               className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 sm:w-48"
               value={filter}
-              onChange={(event) => setFilter(event.target.value as RequestStatus)}
+              onChange={(event) => setFilter(event.target.value as AdminFilter)}
             >
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {statusLabel(status)}
+              {filters.map((currentFilter) => (
+                <option key={currentFilter} value={currentFilter}>
+                  {filterLabel(currentFilter)}
                 </option>
               ))}
             </select>
