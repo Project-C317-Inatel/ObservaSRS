@@ -1,6 +1,6 @@
-import { Button } from './components/ui/Button';
 import { ColetaAutonomaForm } from './components/forms/ColetaAutonomaForm';
 import { LoginForm } from './components/forms/LoginForm';
+import { IndicatorsPage } from './features/indicators/IndicatorsPage';
 
 export default function App() {
   return (
@@ -16,16 +16,8 @@ export default function App() {
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
         <ColetaAutonomaForm />
         <LoginForm />
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <Button className="w-full sm:w-auto">Primário</Button>
-          <Button className="w-full sm:w-auto" variant="secondary">
-            Secundário
-          </Button>
-          <Button className="w-full sm:w-auto" variant="ghost">
-            Ghost
-          </Button>
-        </div>
       </section>
+      <IndicatorsPage />
     </main>
   );
 }
