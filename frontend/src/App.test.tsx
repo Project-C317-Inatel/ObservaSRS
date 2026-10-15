@@ -22,9 +22,14 @@ vi.mock('./components/forms/LoginForm', () => ({
 }));
 
 vi.mock('./features/admin/AdminPage', () => ({
-  AdminPage: (props: { onLogout: () => void }) => {
+  AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => {
     adminPage(props);
-    return <button onClick={props.onLogout}>Sair mockado</button>;
+    return (
+      <>
+        <button onClick={props.onLogout}>Sair mockado</button>
+        <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
+      </>
+    );
   },
 }));
 
@@ -43,6 +48,16 @@ describe('App', () => {
     expect(adminPage).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole('button', { name: 'Sair mockado' }));
+    expect(screen.getByText('Login mockado')).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('retorna ao início quando a sessão expira no painel', () => {
+    window.history.replaceState({}, '', '/admin');
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sessão expirada mockada' }));
+
     expect(screen.getByText('Login mockado')).toBeInTheDocument();
     expect(window.location.pathname).toBe('/');
   });

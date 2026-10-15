@@ -20,7 +20,7 @@ export default function App() {
   }
 
   if (path === '/admin') {
-    return <AdminPage onLogout={() => navigate('/')} />;
+    return <AdminPage onLogout={() => navigate('/')} onUnauthenticated={() => navigate('/')} />;
   }
 
   return (
