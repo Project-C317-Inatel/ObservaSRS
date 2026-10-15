@@ -4,6 +4,8 @@ node_modules/
 # Builds and tests
 dist/
 coverage/
+backend/reports/
+backend/.vitest/
 backend/src/generated/prisma/
 
 # Environment variables
