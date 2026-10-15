@@ -11,6 +11,9 @@ backend/src/generated/prisma/
 .env.*
 !.env.example
 
+# Local development services
+docker-compose.yml
+
 # Logs
 *.log
 npm-debug.log*
@@ -20,4 +23,3 @@ npm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
-
