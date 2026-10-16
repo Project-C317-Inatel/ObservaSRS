@@ -1,72 +1,72 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { MemoryRouter, Outlet } from 'react-router';
+import { describe, expect, it, vi } from 'vitest';
 
 import App from './App';
 
-const loginForm = vi.fn();
-const adminPage = vi.fn();
-
-vi.mock('./components/forms/ColetaAutonomaForm', () => ({
-  ColetaAutonomaForm: () => <div>Coleta mockada</div>,
-}));
-
-vi.mock('./features/indicators/IndicatorsPage', () => ({
-  IndicatorsPage: () => <div>Indicadores mockados</div>,
-}));
-
-vi.mock('./components/forms/LoginForm', () => ({
-  LoginForm: (props: { onSuccess?: () => void }) => {
-    loginForm(props);
-    return <button onClick={props.onSuccess}>Login mockado</button>;
-  },
-}));
-
 vi.mock('./features/admin/AdminPage', () => ({
-  AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => {
-    adminPage(props);
-    return (
-      <>
-        <button onClick={props.onLogout}>Sair mockado</button>
-        <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
-      </>
-    );
-  },
+  AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => (
+    <>
+      <button onClick={props.onLogout}>Sair mockado</button>
+      <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
+    </>
+  ),
 }));
+
+vi.mock('./components/routing/ProtectedRoute', () => ({
+  ProtectedRoute: () => <Outlet />,
+}));
+
+function renderApp(path = '/') {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <App />
+    </MemoryRouter>,
+  );
+}
+
+function clicarNoMenu(nomeDoLink: string) {
+  const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
+  fireEvent.click(within(nav).getByRole('link', { name: nomeDoLink }));
+}
 
 describe('App', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    window.history.replaceState({}, '', '/');
+  it('mostra a página inicial pública', () => {
+    renderApp();
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
+    expect(screen.getByText('Leitos ocupados')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Relatórios públicos' })).toBeInTheDocument();
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Dados abertos');
   });
 
-  it('navega para o painel após o sucesso do login e retorna ao início no logout', () => {
-    render(<App />);
+  it('navega pelas páginas públicas', () => {
+    renderApp();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Login mockado' }));
-    expect(screen.getByText('Sair mockado')).toBeInTheDocument();
-    expect(window.location.pathname).toBe('/admin');
-    expect(adminPage).toHaveBeenCalledOnce();
+    clicarNoMenu('Inventário PIT');
+    expect(
+      screen.getByRole('heading', { name: 'PIT — Plano de Inventário Turístico' }),
+    ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sair mockado' }));
-    expect(screen.getByText('Login mockado')).toBeInTheDocument();
-    expect(window.location.pathname).toBe('/');
+    clicarNoMenu('Cadastur/FNRH');
+    expect(screen.getByRole('heading', { name: 'Cadastur & FNRH Digital' })).toBeInTheDocument();
   });
 
-  it('retorna ao início quando a sessão expira no painel', () => {
-    window.history.replaceState({}, '', '/admin');
-    render(<App />);
+  it('abre diretamente uma página pública pela URL', () => {
+    renderApp('/coleta');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sessão expirada mockada' }));
-
-    expect(screen.getByText('Login mockado')).toBeInTheDocument();
-    expect(window.location.pathname).toBe('/');
+    expect(screen.getByRole('heading', { name: /Informe os dados/ })).toBeInTheDocument();
   });
 
-  it('renderiza diretamente o painel quando a rota inicial é /admin', () => {
-    window.history.replaceState({}, '', '/admin');
-    render(<App />);
+  it('redireciona URLs desconhecidas para a página inicial', () => {
+    renderApp('/pagina-que-nao-existe');
 
-    expect(screen.getByText('Sair mockado')).toBeInTheDocument();
-    expect(loginForm).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
+  });
+
+  it('renderiza o painel administrativo na rota protegida', () => {
+    renderApp('/admin');
+
+    expect(screen.getByRole('button', { name: 'Sair mockado' })).toBeInTheDocument();
   });
 });
