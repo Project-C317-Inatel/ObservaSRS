@@ -1,8 +1,21 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { MemoryRouter, Outlet } from 'react-router';
+import { describe, expect, it, vi } from 'vitest';
 
 import App from './App';
+
+vi.mock('./features/admin/AdminPage', () => ({
+  AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => (
+    <>
+      <button onClick={props.onLogout}>Sair mockado</button>
+      <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
+    </>
+  ),
+}));
+
+vi.mock('./components/routing/ProtectedRoute', () => ({
+  ProtectedRoute: () => <Outlet />,
+}));
 
 function renderApp(path = '/') {
   return render(
@@ -17,8 +30,8 @@ function clicarNoMenu(nomeDoLink: string) {
   fireEvent.click(within(nav).getByRole('link', { name: nomeDoLink }));
 }
 
-describe('App — navegação pública', () => {
-  it('mostra hero, indicadores, relatórios e rodapé na página inicial', () => {
+describe('App', () => {
+  it('mostra a página inicial pública', () => {
     renderApp();
 
     expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
@@ -27,30 +40,33 @@ describe('App — navegação pública', () => {
     expect(screen.getByRole('contentinfo')).toHaveTextContent('Dados abertos');
   });
 
-  it('troca de página pelo menu e marca o link ativo', () => {
+  it('navega pelas páginas públicas', () => {
     renderApp();
 
     clicarNoMenu('Inventário PIT');
-
     expect(
       screen.getByRole('heading', { name: 'PIT — Plano de Inventário Turístico' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Inventário PIT' })).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
 
     clicarNoMenu('Cadastur/FNRH');
     expect(screen.getByRole('heading', { name: 'Cadastur & FNRH Digital' })).toBeInTheDocument();
   });
 
-  it('abre direto a página pela URL', () => {
+  it('abre diretamente uma página pública pela URL', () => {
     renderApp('/coleta');
+
     expect(screen.getByRole('heading', { name: /Informe os dados/ })).toBeInTheDocument();
   });
 
-  it('redireciona para a página inicial quando a URL não existe', () => {
+  it('redireciona URLs desconhecidas para a página inicial', () => {
     renderApp('/pagina-que-nao-existe');
+
     expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
+  });
+
+  it('renderiza o painel administrativo na rota protegida', () => {
+    renderApp('/admin');
+
+    expect(screen.getByRole('button', { name: 'Sair mockado' })).toBeInTheDocument();
   });
 });

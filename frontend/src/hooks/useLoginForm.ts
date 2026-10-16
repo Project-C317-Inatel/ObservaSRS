@@ -25,7 +25,7 @@ function validate(values: LoginRequest): LoginErrors {
   return errors;
 }
 
-export function useLoginForm() {
+export function useLoginForm(onSuccess?: (response: Awaited<ReturnType<typeof login>>) => void) {
   const [values, setValues] = useState<LoginRequest>(initialValues);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [status, setStatus] = useState<AsyncStatus>('idle');
@@ -54,6 +54,7 @@ export function useLoginForm() {
       const response = await login(values);
       setStatus('success');
       setFeedback(`Bem-vindo, ${response.usuario.nome}.`);
+      onSuccess?.(response);
     } catch (error: unknown) {
       setStatus('error');
       setFeedback(error instanceof Error ? error.message : 'Não foi possível realizar o login.');
