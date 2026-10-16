@@ -1,23 +1,33 @@
-import { ColetaAutonomaForm } from './components/forms/ColetaAutonomaForm';
-import { LoginForm } from './components/forms/LoginForm';
-import { IndicatorsPage } from './features/indicators/IndicatorsPage';
+import { Navigate, Route, Routes } from 'react-router';
+
+import { PublicLayout } from './components/layout/PublicLayout';
+import { CadasturPage } from './features/cadastur/CadasturPage';
+import { PitPage } from './features/pit/PitPage';
+import { ColetaPage } from './pages/ColetaPage';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 
 export default function App() {
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <header className="bg-brand-gradient px-4 py-10 text-white sm:px-6 sm:py-16">
-        <div className="mx-auto w-full max-w-7xl">
-          <h1 className="text-2xl font-bold sm:text-3xl">ObservaSRS</h1>
-          <p className="mt-2 max-w-xl text-sm sm:text-base">
-            Observatório do Turismo de Santa Rita do Sapucaí
-          </p>
-        </div>
-      </header>
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
-        <ColetaAutonomaForm />
-        <LoginForm />
-      </section>
-      <IndicatorsPage />
-    </main>
+    <Routes>
+      <Route element={<PublicLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="indicadores" element={<HomePage />} />
+        <Route path="relatorios" element={<HomePage />} />
+        <Route path="inventario" element={<PitPage />} />
+        <Route path="cadastur" element={<CadasturPage />} />
+        <Route path="coleta" element={<ColetaPage />} />
+        <Route path="login" element={<LoginPage />} />
+      </Route>
+
+      {/*
+        Área restrita (entra quando o AdminPage for mergeado):
+        <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN']} />}>
+          <Route path="admin" element={<AdminPage />} />
+        </Route>
+      */}
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
