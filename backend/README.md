@@ -25,6 +25,7 @@ npm test             # executa os testes e gera relatorio HTML
 npm run test:watch   # reexecuta os testes ao alterar arquivos
 npm run db:setup     # aplica migrations e cria o super administrador inicial
 npm run db:migrate   # cria/aplica migrations durante o desenvolvimento
+npm run db:deploy    # aplica migrations existentes sem executar o seed
 npm run db:studio    # abre a interface visual do Prisma
 ```
 
@@ -152,6 +153,52 @@ PATCH /admin/solicitacoes/:id/rejeitar
 
 O filtro `status` tambem aceita `APROVADO` e `REJEITADO`. A rejeicao nao exige corpo na
 requisicao.
+
+## Setores e indicadores
+
+Estas rotas exigem uma conta `ADMIN` ou `SUPER_ADMIN` aprovada e ativa:
+
+```http
+POST /admin/setores
+GET  /admin/setores
+GET  /admin/setores/:id
+POST /admin/indicadores
+GET  /admin/indicadores
+GET  /admin/indicadores/:id
+```
+
+As listagens aceitam `ativo=true` ou `ativo=false`. Sem esse filtro, retornam ativos e
+inativos. Os indicadores tambem podem ser filtrados por `setorId`.
+
+Para atualizar um banco que ja esta configurado, execute `npm run db:deploy` e reinicie a API.
+Nao e necessario executar o seed novamente. A migration adiciona as tabelas `setor` e `indicador`.
+
+O guia com exemplos no Swagger e consultas no pgAdmin esta em
+[docs/setores-indicadores.md](../docs/setores-indicadores.md).
+
+## Fontes de dados e registros de indicadores
+
+Estas rotas seguem as mesmas permissoes de setores e indicadores:
+
+```http
+POST /admin/fontes-dados
+GET  /admin/fontes-dados
+GET  /admin/fontes-dados/:id
+POST /admin/registros-indicadores
+GET  /admin/registros-indicadores
+GET  /admin/registros-indicadores/:id
+```
+
+Um registro relaciona indicador, fonte, data de referencia e valor decimal. O indicador e seu
+setor devem estar ativos. A combinacao indicador, fonte e periodo nao pode ser repetida.
+O campo `publicado` inicia como `false` e pode ser informado no cadastro.
+
+As listagens permitem filtrar fontes por `tipo` e registros por `indicadorId`, `fonteId`,
+`setorId`, `publicado`, `periodoInicio` e `periodoFim`. A consulta continua administrativa,
+inclusive para os registros marcados como publicados.
+
+Aplique as migrations com `npm run db:deploy`. O guia de uso no Swagger e no pgAdmin esta em
+[docs/fontes-registros-indicadores.md](../docs/fontes-registros-indicadores.md).
 
 ## Preparacao do banco local
 

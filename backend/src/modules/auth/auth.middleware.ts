@@ -41,3 +41,12 @@ export const exigirSuperAdmin: RequestHandler = (request, _response, next) => {
 
   next();
 };
+
+export const exigirAdministrador: RequestHandler = (request, _response, next) => {
+  if (request.auth?.papel !== 'ADMIN' && request.auth?.papel !== 'SUPER_ADMIN') {
+    next(new AppError(403, 'admin_required', 'Esta operacao exige acesso de administrador.'));
+    return;
+  }
+
+  next();
+};

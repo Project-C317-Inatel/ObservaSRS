@@ -129,6 +129,26 @@ no navegador. Os arquivos gerados não são incluídos no Git.
 
 Consulte [docs/testes-login.md](docs/testes-login.md) para ver os cenários e as instruções completas.
 
+### Setores e Indicadores
+
+O backend possui cadastro, listagem e consulta por ID de setores e indicadores nas rotas
+`/admin/setores` e `/admin/indicadores`. O acesso exige uma conta `ADMIN` ou `SUPER_ADMIN`
+aprovada e ativa. Um indicador pertence a um setor existente e ativo.
+
+Para atualizar um banco já configurado, execute `npm run db:deploy` na pasta `backend/`.
+Os endpoints estão documentados no Swagger. Veja o passo a passo em
+[docs/setores-indicadores.md](docs/setores-indicadores.md).
+
+### Fontes e Registros de Indicadores
+
+As rotas `/admin/fontes-dados` e `/admin/registros-indicadores` permitem cadastrar e consultar
+a origem dos dados e os valores dos indicadores por período. O acesso segue as mesmas
+permissões administrativas dos cadastros de setores e indicadores.
+
+Os registros possuem valor decimal, data de referência e estado de publicação, com filtros
+por indicador, fonte, setor, intervalo de datas e publicação. Consulte os exemplos em
+[docs/fontes-registros-indicadores.md](docs/fontes-registros-indicadores.md).
+
 ## Frontend
 
 O frontend está localizado na pasta `frontend/` e utiliza React, TypeScript e Tailwind CSS.
