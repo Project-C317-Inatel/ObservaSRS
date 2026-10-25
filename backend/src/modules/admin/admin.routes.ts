@@ -5,7 +5,7 @@ import { aprovar, listar, rejeitar } from './admin.controller.js';
 
 export const adminRoutes = Router();
 
-adminRoutes.use('/admin', exigirAutenticacao, exigirSuperAdmin);
+adminRoutes.use('/admin/solicitacoes', exigirAutenticacao, exigirSuperAdmin);
 adminRoutes.get('/admin/solicitacoes', listar);
 adminRoutes.patch('/admin/solicitacoes/:id/aprovar', aprovar);
 adminRoutes.patch('/admin/solicitacoes/:id/rejeitar', rejeitar);

@@ -4,12 +4,17 @@ node_modules/
 # Builds and tests
 dist/
 coverage/
+backend/reports/
+backend/.vitest/
 backend/src/generated/prisma/
 
 # Environment variables
 .env
 .env.*
 !.env.example
+
+# Local development services
+docker-compose.yml
 
 # Logs
 *.log
@@ -20,4 +25,3 @@ npm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
-
