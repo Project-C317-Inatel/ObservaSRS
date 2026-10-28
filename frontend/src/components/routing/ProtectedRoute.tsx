@@ -10,9 +10,7 @@ export interface ProtectedRouteProps {
 }
 
 type SessionState =
-  | { status: 'loading' }
-  | { status: 'authenticated'; user: ApiUser }
-  | { status: 'anonymous' };
+  { status: 'loading' } | { status: 'authenticated'; user: ApiUser } | { status: 'anonymous' };
 
 /**
  * Protege as rotas filhas: consulta a sessão em GET /auth/me (cookie HttpOnly).

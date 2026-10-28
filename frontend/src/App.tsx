@@ -13,10 +13,7 @@ function AdminRoute() {
   const navigate = useNavigate();
 
   return (
-    <AdminPage
-      onLogout={() => navigate('/login')}
-      onUnauthenticated={() => navigate('/login')}
-    />
+    <AdminPage onLogout={() => navigate('/login')} onUnauthenticated={() => navigate('/login')} />
   );
 }
 

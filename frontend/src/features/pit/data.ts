@@ -9,7 +9,6 @@ export const PIT_CATEGORIES = [
 
 export type PitCategory = (typeof PIT_CATEGORIES)[number];
 
-
 export interface PitItem {
   id: number;
   nome: string;

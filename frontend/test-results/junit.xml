@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="70" failures="0" errors="0" time="9.2084513">
+    <testsuite name="src/App.test.tsx" timestamp="2026-10-16T03:00:20.325Z" hostname="Breno_jooj_dskt" tests="5" failures="0" errors="0" skipped="0" time="0.9016877">
+        <testcase classname="src/App.test.tsx" name="App &gt; mostra a página inicial pública" time="0.4959288">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; navega pelas páginas públicas" time="0.2490266">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; abre diretamente uma página pública pela URL" time="0.0535865">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; redireciona URLs desconhecidas para a página inicial" time="0.0761127">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; renderiza o painel administrativo na rota protegida" time="0.0201442">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/forms/ColetaAutonomaForm.test.tsx" timestamp="2026-10-16T03:00:20.333Z" hostname="Breno_jooj_dskt" tests="7" failures="0" errors="0" skipped="0" time="3.3218537">
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve renderizar o título, subtítulo e todos os 5 campos com seus labels" time="0.0997486">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve exibir erros de validação ao submeter formulário vazio" time="0.0726009">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve aplicar máscara no CNPJ progressivamente ao digitar" time="0.2353635">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve submeter os dados corretamente quando o formulário for válido" time="0.8986917">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve desabilitar campos e exibir &quot;Enviando...&quot; durante requisição" time="0.8261134">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve exibir mensagem de erro quando o envio falhar" time="0.5439282">
+        </testcase>
+        <testcase classname="src/components/forms/ColetaAutonomaForm.test.tsx" name="ColetaAutonomaForm &gt; deve redefinir campos e erros ao clicar no botão &quot;Limpar&quot;" time="0.6425496">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/forms/LoginForm.test.tsx" timestamp="2026-10-16T03:00:20.337Z" hostname="Breno_jooj_dskt" tests="3" failures="0" errors="0" skipped="0" time="1.4697142">
+        <testcase classname="src/components/forms/LoginForm.test.tsx" name="LoginForm &gt; renderiza título padrão e mostra validações ao submeter vazio" time="0.1546214">
+        </testcase>
+        <testcase classname="src/components/forms/LoginForm.test.tsx" name="LoginForm &gt; chama onSuccess após login válido" time="0.6225019">
+        </testcase>
+        <testcase classname="src/components/forms/LoginForm.test.tsx" name="LoginForm &gt; desabilita os campos enquanto o login está em andamento" time="0.6893716">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/routing/ProtectedRoute.test.tsx" timestamp="2026-10-16T03:00:20.339Z" hostname="Breno_jooj_dskt" tests="3" failures="0" errors="0" skipped="0" time="0.3623007">
+        <testcase classname="src/components/routing/ProtectedRoute.test.tsx" name="ProtectedRoute &gt; mostra a página quando o usuário tem o papel permitido" time="0.301701">
+        </testcase>
+        <testcase classname="src/components/routing/ProtectedRoute.test.tsx" name="ProtectedRoute &gt; manda para o login quando não há sessão" time="0.0231577">
+        </testcase>
+        <testcase classname="src/components/routing/ProtectedRoute.test.tsx" name="ProtectedRoute &gt; volta para o início quando o papel não tem permissão" time="0.0299456">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/admin/AdminPage.test.tsx" timestamp="2026-10-16T03:00:20.341Z" hostname="Breno_jooj_dskt" tests="7" failures="0" errors="0" skipped="0" time="0.6848759">
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; carrega solicitações pendentes e permite visualizar os detalhes" time="0.1955898">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; filtra solicitações pelo status selecionado" time="0.1057969">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; lista todas as solicitações sem enviar um status para a API" time="0.094692">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; confirma e aprova uma solicitação pendente" time="0.0790739">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; confirma e rejeita uma solicitação pendente" time="0.0961163">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; não executa a ação quando a confirmação é cancelada" time="0.0942612">
+        </testcase>
+        <testcase classname="src/features/admin/AdminPage.test.tsx" name="AdminPage &gt; solicita redirecionamento quando a sessão não está autenticada" time="0.0160961">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/indicators/IndicatorsPage.test.tsx" timestamp="2026-10-16T03:00:20.343Z" hostname="Breno_jooj_dskt" tests="1" failures="0" errors="0" skipped="0" time="0.7950308">
+        <testcase classname="src/features/indicators/IndicatorsPage.test.tsx" name="IndicatorsPage &gt; atualiza filtros, alterna o gráfico e permite limpar a seleção" time="0.789696">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/indicators/logic.test.ts" timestamp="2026-10-16T03:00:20.344Z" hostname="Breno_jooj_dskt" tests="6" failures="0" errors="0" skipped="0" time="0.0043971">
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; filtra por ano, período e setor de forma combinável sem mutar a fonte" time="0.0019456">
+        </testcase>
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; retorna resultado vazio quando não há correspondências" time="0.0002475">
+        </testcase>
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; obtém opções únicas e ordenadas" time="0.0004214">
+        </testcase>
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; agrega visitantes por período em ordem temporal" time="0.0003663">
+        </testcase>
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; deriva cards com soma, média e nulo quando não há valores" time="0.0002577">
+        </testcase>
+        <testcase classname="src/features/indicators/logic.test.ts" name="lógica dos indicadores &gt; usa os dados demonstrativos para calcular cards da tela" time="0.0001803">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/indicators/useIndicators.test.ts" timestamp="2026-10-16T03:00:20.350Z" hostname="Breno_jooj_dskt" tests="5" failures="0" errors="0" skipped="0" time="0.3293228">
+        <testcase classname="src/features/indicators/useIndicators.test.ts" name="useIndicators &gt; calcula a visão inicial com os dados demonstrativos" time="0.0114178">
+        </testcase>
+        <testcase classname="src/features/indicators/useIndicators.test.ts" name="useIndicators &gt; mantém filtros globais e deriva novamente fluxo e cards" time="0.0707501">
+        </testcase>
+        <testcase classname="src/features/indicators/useIndicators.test.ts" name="useIndicators &gt; permite alterar um filtro e resetar todos os filtros" time="0.1615442">
+        </testcase>
+        <testcase classname="src/features/indicators/useIndicators.test.ts" name="useIndicators &gt; expõe loading antes de publicar a nova derivação dos filtros" time="0.0778256">
+        </testcase>
+        <testcase classname="src/features/indicators/useIndicators.test.ts" name="useIndicators &gt; explicita o estado vazio sem consultar backend" time="0.0046282">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/pit/PitPage.test.tsx" timestamp="2026-10-16T03:00:20.354Z" hostname="Breno_jooj_dskt" tests="3" failures="0" errors="0" skipped="0" time="0.5371102">
+        <testcase classname="src/features/pit/PitPage.test.tsx" name="Inventário PIT &gt; mostra todos os itens e filtra por categoria" time="0.5135183">
+        </testcase>
+        <testcase classname="src/features/pit/PitPage.test.tsx" name="Inventário PIT &gt; mostra mensagem quando a categoria não tem itens" time="0.0143101">
+        </testcase>
+        <testcase classname="src/features/pit/PitPage.test.tsx" name="Inventário PIT &gt; filtra e formata datas corretamente" time="0.0026383">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/reports/ReportsSection.test.tsx" timestamp="2026-10-16T03:00:20.356Z" hostname="Breno_jooj_dskt" tests="4" failures="0" errors="0" skipped="0" time="0.379961">
+        <testcase classname="src/features/reports/ReportsSection.test.tsx" name="Relatórios públicos &gt; mostra link de download quando o PDF existe" time="0.3516876">
+        </testcase>
+        <testcase classname="src/features/reports/ReportsSection.test.tsx" name="Relatórios públicos &gt; desabilita o download quando o PDF ainda não foi publicado" time="0.0135163">
+        </testcase>
+        <testcase classname="src/features/reports/ReportsSection.test.tsx" name="Relatórios públicos &gt; mostra mensagem quando não há relatórios" time="0.0069095">
+        </testcase>
+        <testcase classname="src/features/reports/ReportsSection.test.tsx" name="Relatórios públicos &gt; formata a data de publicação como mês e ano" time="0.0018145">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/hooks/useAdminSession.test.ts" timestamp="2026-10-16T03:00:20.357Z" hostname="Breno_jooj_dskt" tests="4" failures="0" errors="0" skipped="0" time="0.3214121">
+        <testcase classname="src/hooks/useAdminSession.test.ts" name="useAdminSession &gt; autentica super administrador após validar a sessão" time="0.0983904">
+        </testcase>
+        <testcase classname="src/hooks/useAdminSession.test.ts" name="useAdminSession &gt; marca a sessão como proibida para usuário sem papel de super administrador" time="0.0762993">
+        </testcase>
+        <testcase classname="src/hooks/useAdminSession.test.ts" name="useAdminSession &gt; diferencia sessão expirada de outros erros da API" time="0.0648999">
+        </testcase>
+        <testcase classname="src/hooks/useAdminSession.test.ts" name="useAdminSession &gt; encerra a sessão e limpa o usuário ao fazer logout" time="0.0742003">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/hooks/useColetaAutonomaForm.test.ts" timestamp="2026-10-16T03:00:20.359Z" hostname="Breno_jooj_dskt" tests="13" failures="0" errors="0" skipped="0" time="0.0235132">
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="formatarCnpj &gt; deve formatar valor vazio" time="0.0010189">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="formatarCnpj &gt; deve remover caracteres não numéricos" time="0.0001839">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="formatarCnpj &gt; deve formatar CNPJ parcial progressivamente" time="0.0002006">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="formatarCnpj &gt; deve formatar CNPJ completo com 14 dígitos" time="0.0001345">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="formatarCnpj &gt; deve truncar se exceder 14 dígitos" time="0.0001113">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve inicializar com valores padrão e estado limpo" time="0.0098839">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve atualizar campos via updateField e limpar erros prévios do campo" time="0.0020155">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve validar campos obrigatórios no submit e não chamar a API quando inválido" time="0.0017573">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve validar CNPJ com menos de 14 dígitos" time="0.0014458">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve validar leitos ocupados negativos" time="0.0013915">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve enviar com sucesso, resetar formulário e definir feedback positivo" time="0.0014778">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve lidar com falha no envio e exibir feedback de erro" time="0.0010032">
+        </testcase>
+        <testcase classname="src/hooks/useColetaAutonomaForm.test.ts" name="useColetaAutonomaForm &gt; deve redefinir todos os campos, erros e status ao chamar reset" time="0.0007768">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/hooks/useLoginForm.test.ts" timestamp="2026-10-16T03:00:20.366Z" hostname="Breno_jooj_dskt" tests="4" failures="0" errors="0" skipped="0" time="0.0508068">
+        <testcase classname="src/hooks/useLoginForm.test.ts" name="useLoginForm &gt; inicializa com valores vazios e estado idle" time="0.0316959">
+        </testcase>
+        <testcase classname="src/hooks/useLoginForm.test.ts" name="useLoginForm &gt; valida os campos e não chama a API quando o formulário é inválido" time="0.0057581">
+        </testcase>
+        <testcase classname="src/hooks/useLoginForm.test.ts" name="useLoginForm &gt; envia o login, define feedback de sucesso e chama onSuccess com a resposta" time="0.0049416">
+        </testcase>
+        <testcase classname="src/hooks/useLoginForm.test.ts" name="useLoginForm &gt; exibe o erro retornado pela API" time="0.0051351">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/services/admin.test.ts" timestamp="2026-10-16T03:00:20.368Z" hostname="Breno_jooj_dskt" tests="2" failures="0" errors="0" skipped="0" time="0.0108479">
+        <testcase classname="src/services/admin.test.ts" name="admin service &gt; lista todas as solicitações sem query de status" time="0.004836">
+        </testcase>
+        <testcase classname="src/services/admin.test.ts" name="admin service &gt; envia o status selecionado como query string" time="0.0011633">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/services/coleta.test.ts" timestamp="2026-10-16T03:00:20.369Z" hostname="Breno_jooj_dskt" tests="3" failures="0" errors="0" skipped="0" time="0.0156172">
+        <testcase classname="src/services/coleta.test.ts" name="enviarColeta &gt; deve chamar api.post com o path e body corretos" time="0.0071123">
+        </testcase>
+        <testcase classname="src/services/coleta.test.ts" name="enviarColeta &gt; deve retornar a response da API" time="0.0013542">
+        </testcase>
+        <testcase classname="src/services/coleta.test.ts" name="enviarColeta &gt; deve propagar erro se api.post rejeitar" time="0.0035688">
+        </testcase>
+    </testsuite>
+</testsuites>
