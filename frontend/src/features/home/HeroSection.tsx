@@ -34,8 +34,8 @@ export function HeroSection({ metrics = HIGHLIGHT_METRICS }: HeroSectionProps) {
         </p>
 
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {metrics.map((metric) => (
-              <li key={metric.id}>
+          {metrics.map((metric) => (
+            <li key={metric.id}>
               <KpiCard
                 label={metric.label}
                 value={metric.value}
