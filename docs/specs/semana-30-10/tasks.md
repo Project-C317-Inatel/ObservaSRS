@@ -108,7 +108,7 @@ Legenda de dependência:
       - Se `shouldUseFallback()` for falsa (produção sem a flag): devolve `status: 'error'`, sem usar dados fixos, permitindo que a tela apresente o estado de erro existente.
   - **Teste esperado**: Testes em `useIndicators.test.ts` cobrindo 4 cenários: (1) sucesso da API com conversão pelo adaptador, (2) flag de mock ativa, (3) erro da API em desenvolvimento (fallback com ready), (4) erro da API em produção (status error).
 
-- [ ] **Task 3.3: Criar hook `useReports` com fallback controlado, atualizar `data.ts`, `ReportsSection.tsx` e testes existentes** 🟢 [Pode andar com mock]
+- [x] **Task 3.3: Criar hook `useReports` com fallback controlado, atualizar `data.ts`, `ReportsSection.tsx` e testes existentes** 🟢 [Pode andar com mock]
   - **Arquivos envolvidos**: `frontend/src/services/relatorios.ts`, `frontend/src/services/relatorios.test.ts`, `frontend/src/features/reports/data.ts`, `frontend/src/features/reports/useReports.ts`, `frontend/src/features/reports/useReports.test.ts`, `frontend/src/features/reports/ReportsSection.tsx`, `frontend/src/features/reports/ReportsSection.test.tsx`
   - **Critério de aceite**:
     - `features/reports/data.ts` importa o tipo `PublicReport` de `types/` (com `id: string`) e atualiza a constante `PUBLIC_REPORTS` com IDs string.
