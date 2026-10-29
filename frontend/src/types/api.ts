@@ -152,6 +152,10 @@ export interface RegistroAdminItem {
   atualizadoEm: string;
 }
 
+export interface ListRegistrosAdminResponse {
+  registros: RegistroAdminItem[];
+}
+
 export interface RegistroResponse {
   message: string;
   registro: RegistroAdminItem;

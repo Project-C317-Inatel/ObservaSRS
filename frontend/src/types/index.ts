@@ -16,6 +16,7 @@ export type {
   ListHighlightMetricsResponse,
   ListIndicadoresResponse,
   ListPitResponse,
+  ListRegistrosAdminResponse,
   ListRegistrosResponse,
   ListReportsResponse,
   ListSetoresResponse,

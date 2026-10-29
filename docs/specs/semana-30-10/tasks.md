@@ -53,7 +53,7 @@ Legenda de dependência:
     - Usa o cliente `api.get` com tratamento de parâmetros de busca via query string.
   - **Teste esperado**: Teste unitário com `vi.mock('./api')` verificando query strings geradas e respostas tipadas.
 
-- [ ] **Task 2.2: Implementar serviço de registros de indicadores (`services/registros.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
+- [x] **Task 2.2: Implementar serviço de registros de indicadores (`services/registros.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
   - **Arquivos envolvidos**: `frontend/src/services/registros.ts`, `frontend/src/services/registros.test.ts`
   - **Critério de aceite**:
     - Exporta `listarRegistrosAdmin(filtros)`, `criarRegistroIndicador(dados)`, `atualizarRegistroIndicador(id, dados)` e `alterarPublicacaoRegistro(id, publicado)`.
