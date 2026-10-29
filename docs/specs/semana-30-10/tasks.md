@@ -87,7 +87,7 @@ Legenda de dependência:
 
 ### Fase 3: Adaptador, Hooks com Suporte a Fallback e Atualização dos Componentes
 
-- [ ] **Task 3.1: Implementar adaptador de registros de indicadores (`features/indicators/adapter.ts`)** 🟢 [Pode andar com mock]
+- [x] **Task 3.1: Implementar adaptador de registros de indicadores (`features/indicators/adapter.ts`)** 🟢 [Pode andar com mock]
   - **Arquivos envolvidos**: `frontend/src/features/indicators/adapter.ts`, `frontend/src/features/indicators/adapter.test.ts`
   - **Critério de aceite**:
     - Criação de função pura que converte a lista de `registros` da API (`RegistroIndicador[]`) em `IndicatorRecord[]`.
