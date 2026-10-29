@@ -57,7 +57,7 @@ export function AdminPage({ onLogout, onUnauthenticated }: AdminPageProps) {
     return <StatusPanel message={session.error ?? 'Sua sessão expirou. Faça login novamente.'} />;
   }
   if (session.status === 'forbidden') {
-    return <StatusPanel message="Esta área exige acesso de super administrador." />;
+    return <StatusPanel message="Você não tem permissão para acessar esta área." />;
   }
   if (session.status === 'error') {
     return <StatusPanel message={session.error ?? 'Não foi possível validar sua sessão.'} />;

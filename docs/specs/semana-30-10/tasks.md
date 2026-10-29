@@ -141,7 +141,7 @@ Legenda de dependência:
 
 ### Fase 4: Autorização do Painel Administrativo (`ADMIN` vs `SUPER_ADMIN`)
 
-- [ ] **Task 4.1: Ajustar regras de acesso no `App.tsx`, `useAdminSession.ts` e criar placeholder de ADMIN** 🟢 [Pode andar com mock]
+- [x] **Task 4.1: Ajustar regras de acesso no `App.tsx`, `useAdminSession.ts` e criar placeholder de ADMIN** 🟢 [Pode andar com mock]
   - **Arquivos envolvidos**: `frontend/src/App.tsx`, `frontend/src/App.test.tsx`, `frontend/src/hooks/useAdminSession.ts`, `frontend/src/features/admin/AdminPlaceholderPage.tsx`, `frontend/src/features/admin/AdminPlaceholderPage.test.tsx`, `frontend/src/features/admin/AdminPage.tsx`
   - **Critério de aceite**:
     - Criar componente `AdminPlaceholderPage.tsx` contendo título "Painel administrativo", botão de sair e, somente para usuário `SUPER_ADMIN`, link de navegação para `/admin/solicitacoes`.

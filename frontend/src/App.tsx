@@ -5,11 +5,23 @@ import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { CadasturPage } from './features/cadastur/CadasturPage';
 import { PitPage } from './features/pit/PitPage';
 import { AdminPage } from './features/admin/AdminPage';
+import { AdminPlaceholderPage } from './features/admin/AdminPlaceholderPage';
 import { ColetaPage } from './pages/ColetaPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 
-function AdminRoute() {
+function AdminHomeRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <AdminPlaceholderPage
+      onLogout={() => navigate('/login')}
+      onUnauthenticated={() => navigate('/login')}
+    />
+  );
+}
+
+function AccessRequestsRoute() {
   const navigate = useNavigate();
 
   return (
@@ -30,8 +42,12 @@ export default function App() {
         <Route path="login" element={<LoginPage />} />
       </Route>
 
+      <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
+        <Route path="admin" element={<AdminHomeRoute />} />
+      </Route>
+
       <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-        <Route path="admin" element={<AdminRoute />} />
+        <Route path="admin/solicitacoes" element={<AccessRequestsRoute />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
