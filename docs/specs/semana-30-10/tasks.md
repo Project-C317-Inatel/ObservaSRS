@@ -61,7 +61,7 @@ Legenda de dependência:
     - Não inclui função de exclusão de registros (`DELETE`), preservando o histórico de dados entre gestões da prefeitura.
   - **Teste esperado**: Teste unitário cobrindo envio de payload JSON em `criarRegistroIndicador`, `atualizarRegistroIndicador` e `alterarPublicacaoRegistro` via `api.patch`.
 
-- [ ] **Task 2.3: Implementar serviço de relatórios públicos e upload administrativo (`services/relatorios.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
+- [x] **Task 2.3: Implementar serviço de relatórios públicos e upload administrativo (`services/relatorios.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
   - **Arquivos envolvidos**: `frontend/src/services/relatorios.ts`, `frontend/src/services/relatorios.test.ts`
   - **Critério de aceite**:
     - Exporta `listarRelatorios(tipo?)` chamando `GET /relatorios`.
