@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { isMockMode, shouldUseFallback } from '../../services/fallback';
+import { listarRegistrosPublicados } from '../../services/indicadores';
 import { INDICATOR_DATA, SECONDARY_METRIC_DEFINITIONS } from './data';
+import { adaptIndicatorRecords } from './adapter';
 import {
   aggregateVisitorFlow,
   deriveSecondaryCards,
@@ -73,6 +76,13 @@ interface DerivedIndicators {
   error: Error | null;
 }
 
+const EMPTY_DERIVED: DerivedIndicators = {
+  options: { years: [], periods: [], sectors: [] },
+  visitorFlow: [],
+  secondaryCards: [],
+  error: null,
+};
+
 const calculateIndicators = (
   records: readonly IndicatorRecord[],
   filters: IndicatorFilters,
@@ -90,79 +100,145 @@ const calculateIndicators = (
 };
 
 export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicatorsResult {
-  const records = options.records ?? INDICATOR_DATA;
+  const explicitRecords = options.records;
   const metricDefinitions = options.metricDefinitions ?? SECONDARY_METRIC_DEFINITIONS;
   const [filters, setFiltersState] = useState<IndicatorFilters>(() =>
     getInitialFilters(options.initialFilters),
   );
   const [chartType, setChartTypeState] = useState<ChartType>(options.initialChartType ?? 'bar');
-  const [derived, setDerived] = useState<DerivedIndicators>(() => {
-    try {
-      return calculateIndicators(
-        records,
-        getInitialFilters(options.initialFilters),
-        metricDefinitions,
-      );
-    } catch (cause: unknown) {
-      return {
-        options: { years: [], periods: [], sectors: [] },
-        visitorFlow: [],
-        secondaryCards: [],
-        error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
-      };
-    }
-  });
-  const [status, setStatus] = useState<IndicatorsStatus>(() => {
-    try {
-      return calculateIndicators(
-        records,
-        getInitialFilters(options.initialFilters),
-        metricDefinitions,
-      ).visitorFlow.length === 0
-        ? 'empty'
-        : 'ready';
-    } catch {
-      return 'error';
-    }
-  });
-  const calculationId = useRef(0);
-  const isInitialRender = useRef(true);
-  const filtersRef = useRef(filters);
 
+  // When explicit records are passed, skip API fetch and use them directly.
+  const useExplicitRecords = explicitRecords !== undefined;
+
+  // API data state: null = not yet fetched, IndicatorRecord[] = fetched.
+  const [apiRecords, setApiRecords] = useState<readonly IndicatorRecord[] | null>(
+    useExplicitRecords ? explicitRecords : null,
+  );
+  const [status, setStatus] = useState<IndicatorsStatus>(() => {
+    if (useExplicitRecords) {
+      try {
+        const d = calculateIndicators(
+          explicitRecords,
+          getInitialFilters(options.initialFilters),
+          metricDefinitions,
+        );
+        return d.visitorFlow.length === 0 ? 'empty' : 'ready';
+      } catch {
+        return 'error';
+      }
+    }
+    // If mock mode, initialise as ready (will be set after first effect).
+    return 'loading';
+  });
+
+  const [derived, setDerived] = useState<DerivedIndicators>(() => {
+    if (useExplicitRecords) {
+      try {
+        return calculateIndicators(
+          explicitRecords,
+          getInitialFilters(options.initialFilters),
+          metricDefinitions,
+        );
+      } catch (cause: unknown) {
+        return {
+          ...EMPTY_DERIVED,
+          error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
+        };
+      }
+    }
+    return EMPTY_DERIVED;
+  });
+
+  const calculationId = useRef(0);
+  const filtersRef = useRef(filters);
+  // Set to true when the API fetch fails fatally (production, no fallback).
+  // Prevents the derivation effect from overwriting the error status.
+  const fetchFailed = useRef(false);
+
+  const isFirstDerivation = useRef(true);
+
+  // Step 1: fetch records from API (or use mock data) on mount when no explicit records provided.
+  // Step 2: derive indicators whenever records or filters change.
+  // Both steps are merged: fetch resolves into apiRecords; the derivation effect runs on apiRecords.
   useEffect(() => {
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
-      return;
+    if (useExplicitRecords) return;
+
+    let cancelled = false;
+
+    const resolveRecords = isMockMode()
+      ? Promise.resolve(INDICATOR_DATA)
+      : listarRegistrosPublicados()
+          .then((response) => adaptIndicatorRecords(response.registros))
+          .catch((err: unknown) => {
+            if (shouldUseFallback()) {
+              console.warn(
+                '[useIndicators] Falha ao buscar registros da API; usando dados demonstrativos.',
+                err,
+              );
+              return INDICATOR_DATA;
+            }
+            throw err;
+          });
+
+    resolveRecords
+      .then((records) => {
+        if (cancelled) return;
+        setApiRecords(records);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        fetchFailed.current = true;
+        setDerived({
+          ...EMPTY_DERIVED,
+          error: err instanceof Error ? err : new Error('Falha ao buscar os indicadores.'),
+        });
+        setStatus('error');
+        // Trigger the derivation effect guard by setting an empty array,
+        // but fetchFailed.current will prevent it from overwriting the error.
+        setApiRecords([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [useExplicitRecords]);
+
+  // Derive indicators whenever records or filters change.
+  useEffect(() => {
+    const activeRecords = useExplicitRecords ? (explicitRecords ?? []) : (apiRecords ?? []);
+    const recordsReady = useExplicitRecords || apiRecords !== null;
+
+    if (!recordsReady) return;
+
+    // If the fetch failed fatally, do not overwrite the error status with derivation.
+    if (fetchFailed.current) return;
+
+    // Skip setting loading on the very first derivation (initial render already set status).
+    const isFirst = isFirstDerivation.current;
+    isFirstDerivation.current = false;
+
+    if (!isFirst) {
+      setStatus('loading');
     }
 
     const currentCalculation = ++calculationId.current;
-    let cancelled = false;
 
-    // Defer local synchronous derivation so the loading state has a distinct render.
     queueMicrotask(() => {
-      if (cancelled || currentCalculation !== calculationId.current) return;
+      if (currentCalculation !== calculationId.current) return;
 
       try {
-        const nextDerived = calculateIndicators(records, filters, metricDefinitions);
+        const nextDerived = calculateIndicators(activeRecords, filters, metricDefinitions);
         setDerived(nextDerived);
-        setStatus(
-          nextDerived.error ? 'error' : nextDerived.visitorFlow.length === 0 ? 'empty' : 'ready',
-        );
+        setStatus(nextDerived.visitorFlow.length === 0 ? 'empty' : 'ready');
       } catch (cause: unknown) {
         setDerived({
-          options: { years: [], periods: [], sectors: [] },
-          visitorFlow: [],
-          secondaryCards: [],
+          ...EMPTY_DERIVED,
           error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
         });
         setStatus('error');
       }
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [filters, metricDefinitions, records]);
+  }, [apiRecords, explicitRecords, filters, metricDefinitions, useExplicitRecords]);
 
   const updateFilters = useCallback((changes: Partial<IndicatorFilters>) => {
     const nextFilters = { ...filtersRef.current, ...changes };
@@ -174,7 +250,6 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
       return;
     }
     filtersRef.current = nextFilters;
-    setStatus('loading');
     setFiltersState(nextFilters);
   }, []);
 

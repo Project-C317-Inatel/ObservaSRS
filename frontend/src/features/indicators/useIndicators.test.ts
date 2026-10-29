@@ -1,11 +1,57 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { useIndicators } from './useIndicators';
 
-describe('useIndicators', () => {
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock('../../services/fallback', () => ({
+  isMockMode: vi.fn(() => false),
+  shouldUseFallback: vi.fn(() => false),
+}));
+
+vi.mock('../../services/indicadores', () => ({
+  listarRegistrosPublicados: vi.fn(),
+}));
+
+vi.mock('./adapter', () => ({
+  adaptIndicatorRecords: vi.fn((r: unknown[]) => r),
+  adaptarRegistrosIndicadores: vi.fn((r: unknown[]) => r),
+}));
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+import { isMockMode, shouldUseFallback } from '../../services/fallback';
+import { listarRegistrosPublicados } from '../../services/indicadores';
+import { adaptIndicatorRecords } from './adapter';
+import { INDICATOR_DATA } from './data';
+
+const mockIsMockMode = vi.mocked(isMockMode);
+const mockShouldUseFallback = vi.mocked(shouldUseFallback);
+const mockListarRegistrosPublicados = vi.mocked(listarRegistrosPublicados);
+const mockAdaptIndicatorRecords = vi.mocked(adaptIndicatorRecords);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockIsMockMode.mockReturnValue(false);
+  mockShouldUseFallback.mockReturnValue(false);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+// ---------------------------------------------------------------------------
+// Tests with explicit records (existing behaviour — deve continuar a funcionar)
+// ---------------------------------------------------------------------------
+
+describe('useIndicators — registros explícitos (comportamento legado)', () => {
   it('calcula a visão inicial com os dados demonstrativos', () => {
-    const { result } = renderHook(() => useIndicators());
+    const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     expect(result.current.status).toBe('ready');
     expect(result.current.chartType).toBe('bar');
@@ -20,7 +66,7 @@ describe('useIndicators', () => {
   });
 
   it('mantém filtros globais e deriva novamente fluxo e cards', async () => {
-    const { result } = renderHook(() => useIndicators());
+    const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
       result.current.setFilters({ year: 2026, sector: 'Hotelaria' });
@@ -44,7 +90,7 @@ describe('useIndicators', () => {
   });
 
   it('permite alterar um filtro e resetar todos os filtros', async () => {
-    const { result } = renderHook(() => useIndicators());
+    const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
       result.current.setFilter('period', '2025-01');
@@ -64,7 +110,7 @@ describe('useIndicators', () => {
   });
 
   it('expõe loading antes de publicar a nova derivação dos filtros', async () => {
-    const { result } = renderHook(() => useIndicators());
+    const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
       result.current.setFilter('year', 2030);
@@ -89,5 +135,108 @@ describe('useIndicators', () => {
     expect(result.current.error).toBeNull();
     expect(result.current.visitorFlow).toEqual([]);
     expect(result.current.secondaryCards.every((card) => card.value === null)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cenário 1: sucesso da API — converte registros pelo adaptador
+// ---------------------------------------------------------------------------
+
+describe('useIndicators — cenário 1: sucesso da API', () => {
+  it('busca registros da API, adapta e exibe status ready', async () => {
+    const registrosApi = [
+      {
+        id: '1',
+        periodo: '2026-01',
+        setorNome: 'Hotelaria',
+        indicadorCodigo: 'visitantes',
+        indicadorNome: 'Visitantes',
+        unidade: 'pessoas',
+        valor: '500',
+        indicadorId: 'ind-1',
+      },
+    ];
+
+    const adaptedRecords = [
+      { period: '2026-01', year: 2026, sector: 'Hotelaria', visitors: 500, secondaryMetrics: {} },
+    ];
+
+    mockListarRegistrosPublicados.mockResolvedValue({ registros: registrosApi });
+    mockAdaptIndicatorRecords.mockReturnValue(adaptedRecords as ReturnType<typeof adaptIndicatorRecords>);
+
+    const { result } = renderHook(() => useIndicators());
+
+    expect(result.current.status).toBe('loading');
+
+    await waitFor(() => expect(result.current.status).not.toBe('loading'));
+
+    expect(mockListarRegistrosPublicados).toHaveBeenCalledOnce();
+    expect(mockAdaptIndicatorRecords).toHaveBeenCalledWith(registrosApi);
+    expect(result.current.status).toMatch(/^(ready|empty)$/);
+    expect(result.current.error).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cenário 2: flag de mock ativa — retorna INDICATOR_DATA imediatamente
+// ---------------------------------------------------------------------------
+
+describe('useIndicators — cenário 2: flag de mock ativa', () => {
+  it('retorna INDICATOR_DATA sem chamar a API quando isMockMode() é true', async () => {
+    mockIsMockMode.mockReturnValue(true);
+    mockAdaptIndicatorRecords.mockReturnValue(INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>);
+
+    const { result } = renderHook(() => useIndicators());
+
+    await waitFor(() => expect(result.current.status).not.toBe('loading'));
+
+    expect(mockListarRegistrosPublicados).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('ready');
+    expect(result.current.error).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cenário 3: erro da API em desenvolvimento (shouldUseFallback = true)
+// ---------------------------------------------------------------------------
+
+describe('useIndicators — cenário 3: erro da API em desenvolvimento', () => {
+  it('aplica fallback para INDICATOR_DATA com status ready em caso de falha', async () => {
+    mockShouldUseFallback.mockReturnValue(true);
+    mockListarRegistrosPublicados.mockRejectedValue(new Error('Network error'));
+    mockAdaptIndicatorRecords.mockReturnValue(INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>);
+
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const { result } = renderHook(() => useIndicators());
+
+    await waitFor(() => expect(result.current.status).not.toBe('loading'));
+
+    expect(result.current.status).toBe('ready');
+    expect(result.current.error).toBeNull();
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cenário 4: erro da API em produção (shouldUseFallback = false)
+// ---------------------------------------------------------------------------
+
+describe('useIndicators — cenário 4: erro da API em produção', () => {
+  it('retorna status error sem usar dados fixos em produção', async () => {
+    mockShouldUseFallback.mockReturnValue(false);
+    const apiError = new Error('500 Internal Server Error');
+    mockListarRegistrosPublicados.mockRejectedValue(apiError);
+
+    const { result } = renderHook(() => useIndicators());
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+
+    expect(result.current.status).toBe('error');
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.visitorFlow).toEqual([]);
+    expect(result.current.secondaryCards).toEqual([]);
   });
 });

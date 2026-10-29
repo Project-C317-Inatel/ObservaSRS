@@ -96,7 +96,7 @@ Legenda de dependência:
     - Agregações e derivações continuam no cliente em `features/indicators/logic.ts`.
   - **Teste esperado**: Teste unitário em `adapter.test.ts` validando o agrupamento correto por período/setor e o preenchimento dos campos principais e secundários.
 
-- [ ] **Task 3.2: Atualizar hook `useIndicators` com suporte a API, adaptador e fallback via `isMockMode()` e `shouldUseFallback()`** 🟢 [Pode andar com mock]
+- [x] **Task 3.2: Atualizar hook `useIndicators` com suporte a API, adaptador e fallback via `isMockMode()` e `shouldUseFallback()`** 🟢 [Pode andar com mock]
   - **Dependência**: Task 1.4 e Task 3.1
   - **Arquivos envolvidos**: `frontend/src/features/indicators/useIndicators.ts`, `frontend/src/features/indicators/useIndicators.test.ts`
   - **Critério de aceite**:
