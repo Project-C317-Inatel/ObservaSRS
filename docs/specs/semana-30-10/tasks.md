@@ -76,7 +76,7 @@ Legenda de dependência:
     - Exporta `criarItemPit(dados)` chamando `POST /admin/pit`, `atualizarItemPit(id, dados)` chamando `PATCH /admin/pit/:id` e `excluirItemPit(id)` chamando `DELETE /admin/pit/:id`.
   - **Teste esperado**: Teste unitário validando filtro por categoria via query string e operações de mutação (`post`, `patch`, `delete`).
 
-- [ ] **Task 2.5: Atualizar serviço de coletas autônomas e adicionar operações de admin (`services/coleta.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
+- [x] **Task 2.5: Atualizar serviço de coletas autônomas e adicionar operações de admin (`services/coleta.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
   - **Arquivos envolvidos**: `frontend/src/services/coleta.ts`, `frontend/src/services/coleta.test.ts`
   - **Critério de aceite**:
     - Atualiza `enviarColeta(dados)` exclusivamente para a rota oficial `POST /coletas` (sem prefixo `/api` e sem fallback).
