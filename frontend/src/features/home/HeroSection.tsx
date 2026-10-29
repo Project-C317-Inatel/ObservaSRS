@@ -1,10 +1,9 @@
+import { KpiCard } from '../../components/ui/KpiCard';
 import { HIGHLIGHT_METRICS, type HighlightMetric } from './data';
 
 export interface HeroSectionProps {
   metrics?: readonly HighlightMetric[];
 }
-
-const numberFormat = new Intl.NumberFormat('pt-BR');
 
 export function HeroSection({ metrics = HIGHLIGHT_METRICS }: HeroSectionProps) {
   return (
@@ -35,16 +34,15 @@ export function HeroSection({ metrics = HIGHLIGHT_METRICS }: HeroSectionProps) {
         </p>
 
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
-            <li key={metric.id} className="rounded-2xl bg-white p-5 text-slate-900 shadow-lg">
-              <span
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${metric.iconClass}`}
-              >
-                <img src={metric.icon} alt="" className="h-6 w-6" />
-              </span>
-              <p className="mt-4 text-3xl font-extrabold">{numberFormat.format(metric.value)}</p>
-              <p className="mt-1 font-semibold text-slate-800">{metric.label}</p>
-              <p className="mt-1 text-sm text-slate-500">{metric.caption}</p>
+            {metrics.map((metric) => (
+              <li key={metric.id}>
+              <KpiCard
+                label={metric.label}
+                value={metric.value}
+                caption={metric.caption}
+                icon={metric.icon}
+                iconClass={metric.iconClass}
+              />
             </li>
           ))}
         </ul>
