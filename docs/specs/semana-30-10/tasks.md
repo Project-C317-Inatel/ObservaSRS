@@ -69,7 +69,7 @@ Legenda de dependência:
     - Exporta `excluirRelatorio(id)` chamando `DELETE /admin/relatorios/:id`.
   - **Teste esperado**: Teste unitário validando chamada de listagem, exclusão e envio de `FormData` para upload.
 
-- [ ] **Task 2.4: Implementar serviço de Inventário Turístico PIT (`services/pit.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
+- [x] **Task 2.4: Implementar serviço de Inventário Turístico PIT (`services/pit.ts`)** 🟡 [Depende de endpoint do backend para integração fim-a-fim]
   - **Arquivos envolvidos**: `frontend/src/services/pit.ts`, `frontend/src/services/pit.test.ts`
   - **Critério de aceite**:
     - Exporta `listarItensPit(categoria?)` chamando `GET /pit`.
