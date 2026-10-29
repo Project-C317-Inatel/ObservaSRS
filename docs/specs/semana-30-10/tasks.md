@@ -119,7 +119,7 @@ Legenda de dependência:
     - `ReportsSection.test.tsx` é atualizado para cobrir IDs string e comportamento assíncrono.
   - **Teste esperado**: Testes unitários do hook `useReports.test.ts` cobrindo os 4 cenários (sucesso, mock, erro em dev, erro em produção) e testes de renderização de `ReportsSection.test.tsx`.
 
-- [ ] **Task 3.4: Criar hook `usePit` com fallback controlado, atualizar `data.ts`, `PitPage.tsx` e testes existentes** 🟢 [Pode andar com mock]
+- [x] **Task 3.4: Criar hook `usePit` com fallback controlado, atualizar `data.ts`, `PitPage.tsx` e testes existentes** 🟢 [Pode andar com mock]
   - **Arquivos envolvidos**: `frontend/src/features/pit/data.ts`, `frontend/src/features/pit/usePit.ts`, `frontend/src/features/pit/usePit.test.ts`, `frontend/src/features/pit/PitPage.tsx`, `frontend/src/features/pit/PitPage.test.tsx`
   - **Critério de aceite**:
     - `features/pit/data.ts` importa o tipo `PitItem` de `types/` (com `id: string`) e atualiza a constante `PIT_ITEMS` com IDs string.
