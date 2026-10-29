@@ -129,7 +129,7 @@ Legenda de dependência:
     - `PitPage.test.tsx` é atualizado para refletir IDs string e carregamento assíncrono.
   - **Teste esperado**: Testes unitários do hook `usePit.test.ts` cobrindo os 4 cenários (sucesso, mock, erro em dev, erro em produção) e testes de renderização de `PitPage.test.tsx`.
 
-- [ ] **Task 3.5: Criar hook `useHighlightMetrics` com fallback controlado e integrar em `HeroSection.tsx`** 🟢 [Pode andar com mock]
+- [x] **Task 3.5: Criar hook `useHighlightMetrics` com fallback controlado e integrar em `HeroSection.tsx`** 🟢 [Pode andar com mock]
   - **Arquivos envolvidos**: `frontend/src/features/home/useHighlightMetrics.ts`, `frontend/src/features/home/useHighlightMetrics.test.ts`, `frontend/src/features/home/HeroSection.tsx`
   - **Critério de aceite**:
     - Hook busca destaques da API (`listarDestaquesHome()`) com fallback controlado via `isMockMode()` e `shouldUseFallback()`.

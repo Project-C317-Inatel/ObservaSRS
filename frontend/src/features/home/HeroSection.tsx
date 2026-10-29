@@ -1,11 +1,16 @@
 import { KpiCard } from '../../components/ui/KpiCard';
-import { HIGHLIGHT_METRICS, type HighlightMetric } from './data';
+import type { HighlightMetric } from './data';
+import { useHighlightMetrics } from './useHighlightMetrics';
 
 export interface HeroSectionProps {
   metrics?: readonly HighlightMetric[];
 }
 
-export function HeroSection({ metrics = HIGHLIGHT_METRICS }: HeroSectionProps) {
+export function HeroSection({ metrics: explicitMetrics }: HeroSectionProps = {}) {
+  const { metrics, status, error } = useHighlightMetrics(
+    explicitMetrics !== undefined ? { metrics: explicitMetrics } : undefined,
+  );
+
   return (
     <section
       aria-labelledby="hero-titulo"
@@ -33,19 +38,39 @@ export function HeroSection({ metrics = HIGHLIGHT_METRICS }: HeroSectionProps) {
           e transparentes para gestores, empreendedores, pesquisadores e cidadãos.
         </p>
 
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
-            <li key={metric.id}>
-              <KpiCard
-                label={metric.label}
-                value={metric.value}
-                caption={metric.caption}
-                icon={metric.icon}
-                iconClass={metric.iconClass}
-              />
-            </li>
-          ))}
-        </ul>
+        {status === 'loading' && (
+          <p className="mt-10 text-white/70" aria-live="polite">
+            Carregando indicadores em destaque…
+          </p>
+        )}
+
+        {status === 'error' && (
+          <p className="mt-10 rounded-2xl border border-white/20 bg-white/10 p-6 text-white/90">
+            {error?.message ?? 'Não foi possível carregar os destaques no momento.'}
+          </p>
+        )}
+
+        {status === 'ready' && metrics.length === 0 && (
+          <p className="mt-10 rounded-2xl border border-white/20 bg-white/10 p-6 text-white/90">
+            Nenhum destaque disponível.
+          </p>
+        )}
+
+        {status === 'ready' && metrics.length > 0 && (
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {metrics.map((metric) => (
+              <li key={metric.id}>
+                <KpiCard
+                  label={metric.label}
+                  value={metric.value}
+                  caption={metric.caption}
+                  icon={metric.icon}
+                  iconClass={metric.iconClass}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
