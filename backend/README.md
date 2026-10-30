@@ -154,6 +154,31 @@ PATCH /admin/solicitacoes/:id/rejeitar
 O filtro `status` tambem aceita `APROVADO` e `REJEITADO`. A rejeicao nao exige corpo na
 requisicao.
 
+## Acesso de contas aprovadas
+
+O SUPER_ADMIN pode desativar e reativar contas ADMIN ou EDITOR ja aprovadas:
+
+```http
+GET   /admin/solicitacoes?status=APROVADO&ativo=false
+PATCH /admin/contas/:id/desativar
+PATCH /admin/contas/:id/reativar
+```
+
+O filtro `ativo` e opcional. Sem ele, a listagem inclui contas ativas e inativas do status
+selecionado. As acoes nao exigem corpo nem justificativa e rejeitam campos adicionais.
+
+O status permanece `APROVADO`, e senha, papel e avaliacao original sao preservados.
+Contas pendentes ou rejeitadas nao podem ser reativadas por essas rotas. A propria conta
+e todas as contas SUPER_ADMIN sao protegidas contra essas alteracoes.
+
+Uma mudanca efetiva de acesso revoga as sessoes anteriores. Depois de reativar, a conta
+precisa fazer novo login com sua senha existente; o cookie antigo nao volta a funcionar.
+Repetir uma acao cujo estado ja esta aplicado retorna `200` sem revogar novamente.
+
+Aplique a migration com `npm run db:deploy` e gere o cliente com `npm run db:generate`.
+O campo interno `versao_sessao` e adicionado sem apagar contas e nao aparece nas respostas
+da API. Nao e necessario executar o seed. Veja [docs/gestao-contas.md](../docs/gestao-contas.md).
+
 ## Setores e indicadores
 
 Estas rotas exigem uma conta `ADMIN` ou `SUPER_ADMIN` aprovada e ativa:
@@ -199,6 +224,161 @@ inclusive para os registros marcados como publicados.
 
 Aplique as migrations com `npm run db:deploy`. O guia de uso no Swagger e no pgAdmin esta em
 [docs/fontes-registros-indicadores.md](../docs/fontes-registros-indicadores.md).
+
+## Edicao e publicacao
+
+Contas `ADMIN` ou `SUPER_ADMIN` aprovadas e ativas podem atualizar os cadastros:
+
+```http
+PATCH /admin/setores/:id
+PATCH /admin/indicadores/:id
+PATCH /admin/fontes-dados/:id
+PATCH /admin/registros-indicadores/:id
+PATCH /admin/registros-indicadores/:id/publicacao
+```
+
+Os quatro endpoints de edicao recebem somente os campos que devem mudar. Os demais sao
+preservados; o corpo nao pode estar vazio nem conter campos desconhecidos. Os campos
+opcionais de texto aceitam `null` para limpar o valor salvo.
+
+Setores e indicadores podem ser ativados ou desativados pelo campo `ativo`, sem excluir
+os dados vinculados. A publicacao recebe `{"publicado": true}` ou `{"publicado": false}`.
+Editar um registro preserva sua publicacao atual. Publicar exige indicador e setor ativos;
+despublicar e permitido mesmo se estiverem inativos. As rotas `/admin` continuam protegidas.
+
+Nao ha novas migrations ou dependencias nesta etapa. O tutorial com exemplos no Swagger
+esta em [docs/edicao-publicacao.md](../docs/edicao-publicacao.md).
+
+## Consulta publica
+
+Estas rotas nao exigem login:
+
+```http
+GET /setores
+GET /setores/:id
+GET /indicadores
+GET /indicadores/:id
+GET /registros-indicadores
+GET /registros-indicadores/:id
+```
+
+Setores devem estar ativos. Indicadores devem estar ativos e vinculados a setores ativos.
+Registros devem estar publicados e ter indicador e setor ativos. Registros nao publicados,
+cadastros inativos e IDs inexistentes retornam `404` nas consultas individuais.
+
+As listas aceitam `pagina` (padrao 1) e `limite` (padrao 20, maximo 100) e retornam
+`paginacao` junto dos itens. Indicadores aceitam `setorId`. Registros aceitam `indicadorId`,
+`fonteId`, `setorId`, `periodoInicio` e `periodoFim`, com datas inclusivas. Filtros desconhecidos
+sao rejeitados; nao e possivel solicitar registros nao publicados pela API publica.
+
+As respostas publicas nao incluem observacoes dos registros ou campos de controle interno.
+Datas e valores mantem os formatos `AAAA-MM-DD` e string decimal com duas casas.
+Nao ha agregacao de valores para graficos nem alteracoes no frontend.
+
+O tutorial esta em [docs/consulta-publica.md](../docs/consulta-publica.md). Nao ha novas
+migrations, dependencias ou mudancas nas permissoes das rotas administrativas.
+
+## Relatorios e PDFs
+
+Instale as dependencias atualizadas com `npm ci` e aplique a migration com `npm run db:deploy`.
+Ela adiciona a tabela `relatorio` e seu vinculo com o administrador que criou o cadastro,
+sem recriar o banco ou executar o seed.
+
+Rotas para ADMIN ou SUPER_ADMIN aprovado e ativo:
+
+```http
+POST  /admin/relatorios
+GET   /admin/relatorios
+GET   /admin/relatorios/:id
+PATCH /admin/relatorios/:id
+POST  /admin/relatorios/:id/arquivo
+GET   /admin/relatorios/:id/arquivo
+PATCH /admin/relatorios/:id/publicacao
+```
+
+Rotas publicas:
+
+```http
+GET /relatorios
+GET /relatorios/:id
+GET /relatorios/:id/arquivo
+```
+
+O cadastro inicia como rascunho. O PDF e enviado separadamente por `multipart/form-data`
+no campo `arquivo`, com limite de 10 MB. A estrutura do PDF e conferida com `pdf-lib`,
+alem do tipo MIME e da extensao; arquivos criptografados ou sem paginas sao rejeitados.
+O parser de upload e o Multer, restrito a essa rota apos a autenticacao.
+
+Publicar exige um PDF disponivel. Substituir o arquivo exige despublicar primeiro.
+Editar metadados preserva o estado de publicacao. A data `publicadoEm` e preenchida ao
+publicar e limpa ao despublicar; repetir o mesmo estado nao muda essa data.
+
+As listas sao paginadas e aceitam `tipo` e `periodoReferencia`. A lista administrativa
+tambem aceita `publicado`. Tipos: `TRIMESTRAL`, `SETORIAL` e `ANUAL`.
+
+`RELATORIOS_STORAGE_DIR` configura o armazenamento privado. O padrao e `storage/relatorios`,
+relativo a pasta `backend/`, tanto ao executar TypeScript quanto o build. Caminhos absolutos
+tambem sao aceitos para volumes persistentes. Nao publique essa pasta por servidor estatico.
+O deploy deve preservar o volume e fazer backup dos PDFs junto do PostgreSQL.
+
+O tutorial completo esta em [docs/relatorios-pdfs.md](../docs/relatorios-pdfs.md).
+
+## Inventario PIT, Estabelecimentos e Coletas
+
+Os modulos seguem a organizacao de schemas, services, controllers e routes.
+A migracao `20261026180000_inventario_pit_coletas` adiciona `item_pit`,
+`estabelecimento` e `submissao_coleta`, com vinculo da avaliacao ao usuario administrativo.
+Para atualizar sem executar o seed:
+
+```powershell
+npm run db:generate
+npm run db:deploy
+```
+
+Rotas para ADMIN ou SUPER_ADMIN aprovado e ativo:
+
+```http
+POST  /admin/itens-pit
+GET   /admin/itens-pit
+GET   /admin/itens-pit/:id
+PATCH /admin/itens-pit/:id
+PATCH /admin/itens-pit/:id/revisao
+POST  /admin/estabelecimentos
+GET   /admin/estabelecimentos
+GET   /admin/estabelecimentos/:id
+PATCH /admin/estabelecimentos/:id
+GET   /admin/coletas
+GET   /admin/coletas/:id
+PATCH /admin/coletas/:id
+PATCH /admin/coletas/:id/aprovar
+PATCH /admin/coletas/:id/rejeitar
+PATCH /admin/coletas/:id/publicacao
+```
+
+Rotas publicas:
+
+```http
+GET  /itens-pit
+GET  /itens-pit/:id
+POST /api/coletas
+GET  /coletas/resumo?periodoReferencia=2026-10
+```
+
+O PIT possui data da ultima revisao e prazo configuravel, com padrao de 180 dias.
+O filtro administrativo `revisaoPendente` identifica prazos atingidos ou vencidos,
+sem envio automatico de notificacoes. Somente itens ativos sao publicos.
+
+O envio de coleta usa o formato do formulario existente no frontend. O primeiro envio
+pode criar o estabelecimento; nao altera cadastros existentes nem verifica titularidade.
+Cada estabelecimento pode ter um envio por mes, inicialmente pendente e nao publicado.
+ADMIN e SUPER_ADMIN podem corrigir valores pendentes e avaliar. Aprovar e publicar
+sao operacoes separadas. O resumo publico expoe somente totais mensais de coletas
+aprovadas, publicadas e vinculadas a estabelecimentos ativos.
+
+As listas dos novos modulos possuem filtros e paginacao. A API nao transforma as
+coletas automaticamente em registros genericos de indicadores. Os exemplos completos,
+regras e consultas no pgAdmin estao em [inventario-pit.md](../docs/inventario-pit.md)
+e [estabelecimentos-coletas.md](../docs/estabelecimentos-coletas.md).
 
 ## Preparacao do banco local
 
