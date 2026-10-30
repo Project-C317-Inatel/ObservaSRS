@@ -17,6 +17,13 @@ import { useReports } from './useReports';
 const mockUseReports = vi.mocked(useReports);
 
 describe('Relatórios públicos', () => {
+  it('repassa reports explicitos para o hook, como a prop items do PIT', () => {
+    const reports: [] = [];
+    mockUseReports.mockReturnValue({ reports, status: 'ready', error: null });
+    render(<ReportsSection reports={reports} />);
+    expect(mockUseReports).toHaveBeenCalledWith({ reports });
+    expect(screen.getByText('Nenhum relatório publicado até o momento.')).toBeInTheDocument();
+  });
   it('mostra carregando enquanto busca dados', () => {
     mockUseReports.mockReturnValue({ reports: [], status: 'loading', error: null });
 

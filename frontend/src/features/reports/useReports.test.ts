@@ -34,6 +34,22 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('useReports — cenário 1: sucesso da API', () => {
+  it('aceita reports explicitos e acompanha novas props sem consultar a API', () => {
+    const { result, rerender } = renderHook(
+      ({ reports }: { reports: typeof PUBLIC_REPORTS }) => useReports({ reports }),
+      { initialProps: { reports: PUBLIC_REPORTS } },
+    );
+    expect(result.current.reports).toBe(PUBLIC_REPORTS);
+    expect(result.current.status).toBe('ready');
+    expect(mockListarRelatorios).not.toHaveBeenCalled();
+    const novos = PUBLIC_REPORTS.slice(0, 1);
+    rerender({ reports: novos });
+    expect(result.current.reports).toBe(novos);
+    rerender({ reports: [] });
+    expect(result.current.reports).toEqual([]);
+    expect(result.current.status).toBe('ready');
+    expect(mockListarRelatorios).not.toHaveBeenCalled();
+  });
   it('busca relatórios da API e retorna status ready', async () => {
     const relatoriosApi = [
       {
