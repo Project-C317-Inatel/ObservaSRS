@@ -1,3 +1,4 @@
+import { CompaniesBySectorChart } from '../features/companies/CompaniesBySectorChart';
 import { HeroSection } from '../features/home/HeroSection';
 import { IndicatorsPage } from '../features/indicators/IndicatorsPage';
 import { ReportsSection } from '../features/reports/ReportsSection';
@@ -8,6 +9,7 @@ export function HomePage() {
       <HeroSection />
       <div id="indicadores" className="scroll-mt-20">
         <IndicatorsPage />
+        <CompaniesBySectorChart />
       </div>
       <ReportsSection />
     </>
