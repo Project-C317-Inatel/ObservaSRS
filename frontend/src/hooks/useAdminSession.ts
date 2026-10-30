@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { getCurrentUser, logout as logoutRequest } from '../services/auth';
-import type { ApiUser } from '../types';
+import type { ApiUser, UserRole } from '../types';
 import { ApiRequestError } from '../services/api';
+
+/** Papéis com acesso ao painel administrativo. */
+const ADMIN_ROLES: readonly UserRole[] = ['ADMIN', 'SUPER_ADMIN'];
 
 export type AdminSessionStatus =
   'checking' | 'authenticated' | 'unauthenticated' | 'forbidden' | 'error';
@@ -19,7 +22,7 @@ export function useAdminSession() {
     try {
       const response = await getCurrentUser();
       setUser(response.usuario);
-      setStatus(response.usuario.papel === 'SUPER_ADMIN' ? 'authenticated' : 'forbidden');
+      setStatus(ADMIN_ROLES.includes(response.usuario.papel) ? 'authenticated' : 'forbidden');
     } catch (requestError: unknown) {
       setUser(null);
       if (requestError instanceof ApiRequestError && requestError.status === 403) {

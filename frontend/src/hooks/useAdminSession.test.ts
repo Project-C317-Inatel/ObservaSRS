@@ -32,13 +32,29 @@ describe('useAdminSession', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('marca a sessão como proibida para usuário sem papel de super administrador', async () => {
+  it('autentica administrador (ADMIN) após validar a sessão', async () => {
     vi.mocked(getCurrentUser).mockResolvedValueOnce({
       usuario: {
         id: 'admin-2',
         nome: 'João Silva',
         email: 'joao@example.com',
         papel: 'ADMIN',
+        status: 'APROVADO',
+      },
+    });
+
+    const { result } = renderHook(() => useAdminSession());
+
+    await waitFor(() => expect(result.current.status).toBe('authenticated'));
+  });
+
+  it('marca a sessão como proibida para papéis sem acesso ao painel', async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce({
+      usuario: {
+        id: 'editor-1',
+        nome: 'Ana Souza',
+        email: 'ana@example.com',
+        papel: 'EDITOR',
         status: 'APROVADO',
       },
     });

@@ -1,13 +1,5 @@
-import { useState } from 'react';
-
-import {
-  PIT_CATEGORIES,
-  PIT_ITEMS,
-  filterPitItems,
-  formatPitDate,
-  type PitCategory,
-  type PitItem,
-} from './data';
+import { PIT_CATEGORIES, formatPitDate, type PitCategory, type PitItem } from './data';
+import { usePit } from './usePit';
 
 export interface PitPageProps {
   items?: readonly PitItem[];
@@ -23,9 +15,10 @@ const CATEGORY_COVER: Record<PitCategory, string> = {
   'Arte / Cultura': 'from-data-lilac to-brand-magenta',
 };
 
-export function PitPage({ items = PIT_ITEMS }: PitPageProps) {
-  const [category, setCategory] = useState<PitCategory | null>(null);
-  const visibleItems = filterPitItems(items, category);
+export function PitPage({ items: explicitItems }: PitPageProps = {}) {
+  const { items, status, error, activeCategory, setCategory } = usePit(
+    explicitItems !== undefined ? { items: explicitItems } : undefined,
+  );
 
   return (
     <section aria-labelledby="pit-titulo" className="bg-slate-50 px-4 py-12 sm:px-6 sm:py-16">
@@ -42,13 +35,13 @@ export function PitPage({ items = PIT_ITEMS }: PitPageProps) {
         </p>
 
         <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoria">
-          <FilterChip active={category === null} onClick={() => setCategory(null)}>
+          <FilterChip active={activeCategory === null} onClick={() => setCategory(null)}>
             Todos
           </FilterChip>
           {PIT_CATEGORIES.map((option) => (
             <FilterChip
               key={option}
-              active={category === option}
+              active={activeCategory === option}
               onClick={() => setCategory(option)}
             >
               {option}
@@ -56,13 +49,27 @@ export function PitPage({ items = PIT_ITEMS }: PitPageProps) {
           ))}
         </div>
 
-        {visibleItems.length === 0 ? (
+        {status === 'loading' && (
+          <p className="mt-8 text-slate-500" aria-live="polite">
+            Carregando inventário…
+          </p>
+        )}
+
+        {status === 'error' && (
+          <p className="mt-8 rounded-2xl border border-dashed border-red-300 p-8 text-center text-red-600">
+            {error?.message ?? 'Não foi possível carregar o inventário. Tente novamente.'}
+          </p>
+        )}
+
+        {status === 'ready' && items.length === 0 && (
           <p className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-600">
             Nenhum item cadastrado nesta categoria.
           </p>
-        ) : (
+        )}
+
+        {status === 'ready' && items.length > 0 && (
           <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleItems.map((item) => (
+            {items.map((item) => (
               <li
                 key={item.id}
                 className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
