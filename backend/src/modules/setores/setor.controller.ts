@@ -1,13 +1,26 @@
 import type { RequestHandler } from 'express';
 
-import { cadastroSetorSchema, listarSetoresSchema, setorIdSchema } from './setor.schemas.js';
-import { buscarSetor, cadastrarSetor, listarSetores } from './setor.service.js';
+import {
+  cadastroSetorSchema,
+  edicaoSetorSchema,
+  listarSetoresSchema,
+  setorIdSchema,
+} from './setor.schemas.js';
+import { buscarSetor, cadastrarSetor, editarSetor, listarSetores } from './setor.service.js';
 
 export const cadastrar: RequestHandler = async (request, response) => {
   const dados = cadastroSetorSchema.parse(request.body);
   const setor = await cadastrarSetor(dados);
 
   response.status(201).json({ message: 'Setor cadastrado com sucesso.', setor });
+};
+
+export const editar: RequestHandler = async (request, response) => {
+  const { id } = setorIdSchema.parse(request.params);
+  const dados = edicaoSetorSchema.parse(request.body);
+  const setor = await editarSetor(id, dados);
+
+  response.status(200).json({ message: 'Setor atualizado com sucesso.', setor });
 };
 
 export const listar: RequestHandler = async (request, response) => {

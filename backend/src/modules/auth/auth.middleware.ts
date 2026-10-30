@@ -23,7 +23,12 @@ export const exigirAutenticacao: RequestHandler = async (request, _response, nex
   }
 
   const usuario = await buscarAdministradorAutenticado(sessao.sub);
-  request.auth = { sub: usuario.id, papel: usuario.papel };
+  if (sessao.versaoSessao !== usuario.versaoSessao) {
+    next(new AppError(401, 'invalid_session', 'A sessao foi revogada. Faca login novamente.'));
+    return;
+  }
+
+  request.auth = { sub: usuario.id, papel: usuario.papel, versaoSessao: usuario.versaoSessao };
   next();
 };
 

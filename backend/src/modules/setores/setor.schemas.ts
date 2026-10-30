@@ -6,6 +6,17 @@ export const cadastroSetorSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
+export const edicaoSetorSchema = cadastroSetorSchema
+  .partial()
+  .extend({
+    descricao: cadastroSetorSchema.shape.descricao.unwrap().nullable().optional(),
+    ativo: z.boolean().optional(),
+  })
+  .strict()
+  .refine((dados) => Object.values(dados).some((valor) => valor !== undefined), {
+    message: 'Informe ao menos um campo para atualizar.',
+  });
+
 export const listarSetoresSchema = z.object({
   ativo: z
     .enum(['true', 'false'])
@@ -18,4 +29,5 @@ export const setorIdSchema = z.object({
 });
 
 export type CadastroSetorInput = z.infer<typeof cadastroSetorSchema>;
+export type EdicaoSetorInput = z.infer<typeof edicaoSetorSchema>;
 export type ListarSetoresInput = z.infer<typeof listarSetoresSchema>;

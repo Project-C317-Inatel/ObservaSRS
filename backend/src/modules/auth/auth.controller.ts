@@ -39,7 +39,7 @@ export const registro: RequestHandler = async (request, response) => {
 export const login: RequestHandler = async (request, response) => {
   const credenciais = loginSchema.parse(request.body);
   const usuario = await autenticarAdministrador(credenciais);
-  const token = criarTokenSessao(usuario.id, usuario.papel);
+  const token = criarTokenSessao(usuario.id, usuario.papel, usuario.versaoSessao);
 
   response.cookie(env.AUTH_COOKIE_NAME, token, sessionCookieOptions);
   response.status(200).json({
