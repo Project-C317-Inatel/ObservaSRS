@@ -13,7 +13,7 @@ export type {
   ColetaResponse,
   Paginacao,
   EvaluationResponse,
-  HighlightMetric,
+  ApiHighlightMetric,
   Indicador,
   ListAccessRequestsResponse,
   ListColetasResponse,

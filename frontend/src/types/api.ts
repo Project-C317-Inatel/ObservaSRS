@@ -183,7 +183,7 @@ export interface RegistroResponse {
   registro: RegistroAdminItem;
 }
 
-export interface HighlightMetric {
+export interface ApiHighlightMetric {
   id: string;
   valor: number;
   rotulo: string;
@@ -191,7 +191,7 @@ export interface HighlightMetric {
 }
 
 export interface ListHighlightMetricsResponse {
-  destaques: HighlightMetric[];
+  destaques: ApiHighlightMetric[];
 }
 
 export type ReportType = 'TRIMESTRAL' | 'SETORIAL' | 'ANUAL';

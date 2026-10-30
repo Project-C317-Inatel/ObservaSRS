@@ -43,7 +43,7 @@ export const PIT_ITEMS: readonly PitItem[] = [
     id: '4',
     nome: 'Cachoeira do Véu de Noiva',
     categoria: 'Atração Natural',
-    descricao: 'Queda d\u2019água em área rural, acesso por estrada de terra.',
+    descricao: 'Queda d’água em área rural, acesso por estrada de terra.',
     imagemUrl: null,
     localizacao: 'Zona rural',
     atualizadoEm: '2025-06-01',

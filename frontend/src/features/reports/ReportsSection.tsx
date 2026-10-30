@@ -1,13 +1,20 @@
 import { resolverUrlDownload } from '../../services/relatorios';
 import { formatReportDate } from './data';
 import { useReports } from './useReports';
+import type { PublicReport } from '../../types';
 
 const downloadClass =
   'mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition';
 const nomesTipos = { TRIMESTRAL: 'Trimestral', SETORIAL: 'Setorial', ANUAL: 'Anual' };
 
-export function ReportsSection() {
-  const { reports, status, error } = useReports();
+export interface ReportsSectionProps {
+  reports?: readonly PublicReport[];
+}
+
+export function ReportsSection({ reports: explicitReports }: ReportsSectionProps = {}) {
+  const { reports, status, error } = useReports(
+    explicitReports !== undefined ? { reports: explicitReports } : undefined,
+  );
 
   return (
     <section

@@ -6,7 +6,7 @@ import iconeHotel from '../../assets/icons/hotel.png';
 import iconeLeito from '../../assets/icons/leito.png';
 import { isMockMode, shouldUseFallback } from '../../services/fallback';
 import { listarDestaquesHome } from '../../services/indicadores';
-import type { HighlightMetric as ApiHighlightMetric } from '../../types';
+import type { ApiHighlightMetric } from '../../types';
 import { HIGHLIGHT_METRICS, type HighlightMetric } from './data';
 
 export type HighlightMetricsStatus = 'loading' | 'ready' | 'error';
@@ -28,21 +28,17 @@ const DEFAULT_ICONS: Record<string, { icon: string; iconClass: string }> = {
   empregos: { icon: iconeEmprego, iconClass: 'bg-brand-magenta' },
 };
 
-function adaptApiHighlight(item: ApiHighlightMetric | HighlightMetric): HighlightMetric {
-  if ('value' in item && typeof item.value === 'number') {
-    return item as HighlightMetric;
-  }
-  const apiItem = item as ApiHighlightMetric;
-  const visual = DEFAULT_ICONS[apiItem.id] ?? {
+function adaptApiHighlight(item: ApiHighlightMetric): HighlightMetric {
+  const visual = DEFAULT_ICONS[item.id] ?? {
     icon: iconeHotel,
     iconClass: 'bg-data-sky',
   };
 
   return {
-    id: apiItem.id,
-    value: apiItem.valor,
-    label: apiItem.rotulo,
-    caption: apiItem.legenda,
+    id: item.id,
+    value: item.valor,
+    label: item.rotulo,
+    caption: item.legenda,
     icon: visual.icon,
     iconClass: visual.iconClass,
   };
@@ -66,18 +62,16 @@ export function useHighlightMetrics(
     let cancelled = false;
 
     const resolveMetrics = isMockMode()
-      ? Promise.resolve(HIGHLIGHT_METRICS as readonly HighlightMetric[])
+      ? Promise.resolve(HIGHLIGHT_METRICS)
       : listarDestaquesHome()
-          .then(
-            (response) => response.destaques.map(adaptApiHighlight) as readonly HighlightMetric[],
-          )
+          .then((response) => response.destaques.map(adaptApiHighlight))
           .catch((err: unknown) => {
             if (shouldUseFallback()) {
               console.warn(
                 '[useHighlightMetrics] Falha ao buscar métricas de destaque da API; usando dados demonstrativos.',
                 err,
               );
-              return HIGHLIGHT_METRICS as readonly HighlightMetric[];
+              return HIGHLIGHT_METRICS;
             }
             throw err;
           });
