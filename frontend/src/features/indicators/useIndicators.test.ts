@@ -162,7 +162,9 @@ describe('useIndicators — cenário 1: sucesso da API', () => {
     ];
 
     mockListarRegistrosPublicados.mockResolvedValue({ registros: registrosApi });
-    mockAdaptIndicatorRecords.mockReturnValue(adaptedRecords as ReturnType<typeof adaptIndicatorRecords>);
+    mockAdaptIndicatorRecords.mockReturnValue(
+      adaptedRecords as ReturnType<typeof adaptIndicatorRecords>,
+    );
 
     const { result } = renderHook(() => useIndicators());
 
@@ -184,7 +186,9 @@ describe('useIndicators — cenário 1: sucesso da API', () => {
 describe('useIndicators — cenário 2: flag de mock ativa', () => {
   it('retorna INDICATOR_DATA sem chamar a API quando isMockMode() é true', async () => {
     mockIsMockMode.mockReturnValue(true);
-    mockAdaptIndicatorRecords.mockReturnValue(INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>);
+    mockAdaptIndicatorRecords.mockReturnValue(
+      INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>,
+    );
 
     const { result } = renderHook(() => useIndicators());
 
@@ -204,7 +208,9 @@ describe('useIndicators — cenário 3: erro da API em desenvolvimento', () => {
   it('aplica fallback para INDICATOR_DATA com status ready em caso de falha', async () => {
     mockShouldUseFallback.mockReturnValue(true);
     mockListarRegistrosPublicados.mockRejectedValue(new Error('Network error'));
-    mockAdaptIndicatorRecords.mockReturnValue(INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>);
+    mockAdaptIndicatorRecords.mockReturnValue(
+      INDICATOR_DATA as ReturnType<typeof adaptIndicatorRecords>,
+    );
 
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 

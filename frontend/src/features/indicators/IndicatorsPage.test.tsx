@@ -1,10 +1,26 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { listarRegistrosPublicados } from '../../services/indicadores';
+import { adaptIndicatorRecords } from './adapter';
+import { INDICATOR_DATA } from './data';
 import { IndicatorsPage } from './IndicatorsPage';
 
+vi.mock('../../services/indicadores', () => ({
+  listarRegistrosPublicados: vi.fn(),
+}));
+
+vi.mock('./adapter', () => ({
+  adaptIndicatorRecords: vi.fn(),
+}));
+
 describe('IndicatorsPage', () => {
+  beforeEach(() => {
+    vi.mocked(listarRegistrosPublicados).mockResolvedValue({ registros: [] });
+    vi.mocked(adaptIndicatorRecords).mockReturnValue(INDICATOR_DATA);
+  });
+
   it('atualiza filtros, alterna o gráfico e permite limpar a seleção', async () => {
     const user = userEvent.setup();
     render(<IndicatorsPage />);

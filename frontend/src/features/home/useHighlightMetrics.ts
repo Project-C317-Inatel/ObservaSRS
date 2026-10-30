@@ -69,8 +69,7 @@ export function useHighlightMetrics(
       ? Promise.resolve(HIGHLIGHT_METRICS as readonly HighlightMetric[])
       : listarDestaquesHome()
           .then(
-            (response) =>
-              response.destaques.map(adaptApiHighlight) as readonly HighlightMetric[],
+            (response) => response.destaques.map(adaptApiHighlight) as readonly HighlightMetric[],
           )
           .catch((err: unknown) => {
             if (shouldUseFallback()) {
@@ -92,9 +91,7 @@ export function useHighlightMetrics(
       .catch((err: unknown) => {
         if (cancelled) return;
         setError(
-          err instanceof Error
-            ? err
-            : new Error('Falha ao buscar as métricas de destaque.'),
+          err instanceof Error ? err : new Error('Falha ao buscar as métricas de destaque.'),
         );
         setStatus('error');
       });
