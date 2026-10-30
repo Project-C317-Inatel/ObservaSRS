@@ -1,14 +1,43 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('../../services/pit', () => ({
+  listarItensPit: vi.fn(),
+}));
+
+vi.mock('../../services/fallback', () => ({
+  isMockMode: vi.fn(() => false),
+  shouldUseFallback: vi.fn(() => false),
+}));
+
+import { isMockMode, shouldUseFallback } from '../../services/fallback';
+import { listarItensPit } from '../../services/pit';
 import { PitPage } from './PitPage';
 import { PIT_ITEMS, filterPitItems, formatPitDate } from './data';
 
+const mockListarItensPit = vi.mocked(listarItensPit);
+const mockIsMockMode = vi.mocked(isMockMode);
+const mockShouldUseFallback = vi.mocked(shouldUseFallback);
+
 describe('Inventário PIT', () => {
-  it('mostra todos os itens e filtra por categoria', () => {
+  it('formata timestamps ISO da API sem acrescentar uma segunda hora', () => {
+    expect(formatPitDate('2026-10-29T15:30:00.000Z')).toBe('29/10/2026');
+  });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockIsMockMode.mockReturnValue(false);
+    mockShouldUseFallback.mockReturnValue(false);
+    mockListarItensPit.mockResolvedValue({ itens: [...PIT_ITEMS] });
+  });
+
+  it('mostra carregando e depois todos os itens, permitindo filtrar por categoria', async () => {
     render(<PitPage />);
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(PIT_ITEMS.length);
+    expect(screen.getByText(/Carregando inventário/)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('listitem')).toHaveLength(PIT_ITEMS.length);
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Gastronomia' }));
 
@@ -23,14 +52,24 @@ describe('Inventário PIT', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(PIT_ITEMS.length);
   });
 
-  it('mostra mensagem quando a categoria não tem itens', () => {
+  it('mostra mensagem quando a categoria ou prop items não tem itens', () => {
     render(<PitPage items={[]} />);
     expect(screen.getByText('Nenhum item cadastrado nesta categoria.')).toBeInTheDocument();
   });
 
-  it('filtra e formata datas corretamente', () => {
+  it('mostra mensagem de erro quando a API falha em produção', async () => {
+    mockListarItensPit.mockRejectedValue(new Error('Falha de conexão com o servidor'));
+
+    render(<PitPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Falha de conexão com o servidor/)).toBeInTheDocument();
+    });
+  });
+
+  it('filtra e formata datas corretamente com id string', () => {
     expect(filterPitItems(PIT_ITEMS, null)).toHaveLength(PIT_ITEMS.length);
-    expect(filterPitItems(PIT_ITEMS, 'Parque Urbano').map((item) => item.id)).toEqual([1]);
+    expect(filterPitItems(PIT_ITEMS, 'Parque Urbano').map((item) => item.id)).toEqual(['1']);
     expect(formatPitDate('2025-08-12')).toBe('12/08/2025');
   });
 });

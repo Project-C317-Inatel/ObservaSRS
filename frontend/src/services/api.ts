@@ -64,6 +64,10 @@ function isApiError(value: unknown): value is ApiError {
 }
 
 async function parseBody(response: Response): Promise<unknown> {
+  if (response.status === 204) {
+    return undefined;
+  }
+
   const contentType = response.headers.get('content-type');
 
   if (!contentType?.includes('application/json')) {
@@ -80,11 +84,18 @@ async function parseBody(response: Response): Promise<unknown> {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   let response: Response;
 
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const defaultHeaders: Record<string, string> = {};
+
+  if (!isFormData) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
+
   try {
     response = await fetch(`${apiUrl}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...defaultHeaders,
         ...options.headers,
       },
       credentials: 'include',
@@ -108,13 +119,22 @@ export const api = {
   },
 
   post<T>(path: string, body?: unknown): Promise<T> {
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
     return request<T>(path, {
       method: 'POST',
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: isFormData ? body : body === undefined ? undefined : JSON.stringify(body),
     });
   },
 
-  patch<T>(path: string): Promise<T> {
-    return request<T>(path, { method: 'PATCH' });
+  patch<T>(path: string, body?: unknown): Promise<T> {
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+    return request<T>(path, {
+      method: 'PATCH',
+      body: isFormData ? body : body === undefined ? undefined : JSON.stringify(body),
+    });
+  },
+
+  delete<T>(path: string): Promise<T> {
+    return request<T>(path, { method: 'DELETE' });
   },
 };

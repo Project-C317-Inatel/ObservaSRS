@@ -1,20 +1,36 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, Outlet } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { MemoryRouter, Navigate, Outlet } from 'react-router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from './App';
+import type { UserRole } from './types';
+
+/** Papel da sessão simulada; `null` representa usuário anônimo. */
+const sessao = vi.hoisted(() => ({ papel: null as UserRole | null }));
 
 vi.mock('./features/admin/AdminPage', () => ({
   AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => (
     <>
+      <p>Solicitações mockadas</p>
       <button onClick={props.onLogout}>Sair mockado</button>
       <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
     </>
   ),
 }));
 
+vi.mock('./features/admin/AdminPlaceholderPage', () => ({
+  AdminPlaceholderPage: () => <p>Painel administrativo mockado</p>,
+}));
+
+// Reproduz a regra real do ProtectedRoute para validar os papéis configurados em cada rota.
 vi.mock('./components/routing/ProtectedRoute', () => ({
-  ProtectedRoute: () => <Outlet />,
+  ProtectedRoute: ({ allowedRoles = [] }: { allowedRoles?: readonly UserRole[] }) => {
+    if (sessao.papel === null) return <Navigate to="/login" replace />;
+    if (allowedRoles.length > 0 && !allowedRoles.includes(sessao.papel)) {
+      return <Navigate to="/" replace />;
+    }
+    return <Outlet />;
+  },
 }));
 
 function renderApp(path = '/') {
@@ -31,12 +47,16 @@ function clicarNoMenu(nomeDoLink: string) {
 }
 
 describe('App', () => {
-  it('mostra a página inicial pública', () => {
+  beforeEach(() => {
+    sessao.papel = null;
+  });
+
+  it('mostra a página inicial pública', async () => {
     renderApp();
 
     expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
-    expect(screen.getByText('Leitos ocupados')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Relatórios públicos' })).toBeInTheDocument();
+    expect(await screen.findByText('Leitos ocupados')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Relatórios públicos' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toHaveTextContent('Dados abertos');
   });
 
@@ -64,9 +84,40 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
   });
 
-  it('renderiza o painel administrativo na rota protegida', () => {
+  it('libera o painel em /admin para ADMIN', () => {
+    sessao.papel = 'ADMIN';
     renderApp('/admin');
 
-    expect(screen.getByRole('button', { name: 'Sair mockado' })).toBeInTheDocument();
+    expect(screen.getByText('Painel administrativo mockado')).toBeInTheDocument();
+  });
+
+  it('libera o painel em /admin para SUPER_ADMIN', () => {
+    sessao.papel = 'SUPER_ADMIN';
+    renderApp('/admin');
+
+    expect(screen.getByText('Painel administrativo mockado')).toBeInTheDocument();
+  });
+
+  it('redireciona ADMIN para a página inicial ao abrir /admin/solicitacoes', () => {
+    sessao.papel = 'ADMIN';
+    renderApp('/admin/solicitacoes');
+
+    expect(screen.queryByText('Solicitações mockadas')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Observa SRS' })).toBeInTheDocument();
+  });
+
+  it('libera /admin/solicitacoes para SUPER_ADMIN', () => {
+    sessao.papel = 'SUPER_ADMIN';
+    renderApp('/admin/solicitacoes');
+
+    expect(screen.getByText('Solicitações mockadas')).toBeInTheDocument();
+  });
+
+  it('redireciona usuário anônimo para o login ao abrir rotas do painel', () => {
+    renderApp('/admin');
+    expect(screen.getByRole('region', { name: 'Login da SMCELT' })).toBeInTheDocument();
+
+    renderApp('/admin/solicitacoes');
+    expect(screen.getAllByRole('region', { name: 'Login da SMCELT' }).length).toBeGreaterThan(0);
   });
 });

@@ -92,6 +92,11 @@ devem ser promovidos ao estado global sem essa necessidade.
 
 ## Integração com a API
 
+Os contratos e exemplos atuais estao em
+[docs/integracao-frontend-api.md](../docs/integracao-frontend-api.md).
+Os servicos de indicadores, PIT e relatorios reunem as paginas da API antes de alimentar
+as telas. Cadastro, envio do PDF e publicacao de relatorios sao operacoes separadas.
+
 As chamadas HTTP são centralizadas em `src/services/api.ts`. O cliente usa a variável
 `VITE_API_URL` como URL base, envia cookies de sessão com `credentials: 'include'` e converte
 falhas HTTP e de rede em erros tipados. Se a variável não for definida, o frontend usa
@@ -108,6 +113,11 @@ Os serviços são separados por domínio:
 - `src/services/auth.ts`: login, sessão atual e logout;
 - `src/services/admin.ts`: listagem, aprovação e rejeição de solicitações;
 - `src/services/status.ts`: verificação de disponibilidade da API.
+- `src/services/indicadores.ts`: setores, indicadores, registros publicos e destaques derivados;
+- `src/services/registros.ts`: cadastro, edicao e publicacao administrativa de registros;
+- `src/services/pit.ts`: leitura publica, cadastro, edicao e ativacao do inventario;
+- `src/services/relatorios.ts`: leitura publica, cadastro, upload de PDF e publicacao;
+- `src/services/coleta.ts`: envio publico, consulta administrativa, avaliacao e publicacao.
 
 Erros `401`, `403`, `404`, `409`, respostas `5xx` e falhas de rede recebem mensagens adequadas
 para a interface. Os componentes devem chamar esses serviços, em vez de usar `fetch` diretamente.
