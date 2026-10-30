@@ -97,6 +97,12 @@ Os contratos e exemplos atuais estao em
 Os servicos de indicadores, PIT e relatorios reunem as paginas da API antes de alimentar
 as telas. Cadastro, envio do PDF e publicacao de relatorios sao operacoes separadas.
 
+`HeroSection`, `PitPage` e `ReportsSection` aceitam dados explicitos pelas props opcionais
+`metrics`, `items` e `reports`, respectivamente. Quando fornecidas, inclusive como listas
+vazias, essas props dispensam a consulta da API. Sem elas, os componentes usam seus hooks
+de carregamento. O tipo `ApiHighlightMetric` representa os dados dos destaques recebidos
+pelo servico; o tipo visual `HighlightMetric` inclui as propriedades de apresentacao.
+
 As chamadas HTTP são centralizadas em `src/services/api.ts`. O cliente usa a variável
 `VITE_API_URL` como URL base, envia cookies de sessão com `credentials: 'include'` e converte
 falhas HTTP e de rede em erros tipados. Se a variável não for definida, o frontend usa
