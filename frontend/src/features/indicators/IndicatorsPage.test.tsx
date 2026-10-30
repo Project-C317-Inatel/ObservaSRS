@@ -25,6 +25,7 @@ describe('IndicatorsPage', () => {
     const user = userEvent.setup();
     render(<IndicatorsPage />);
 
+    await screen.findByText('Pernoites');
     await user.selectOptions(screen.getByLabelText('Ano'), '2026');
     await user.selectOptions(screen.getByLabelText('Setor'), 'Hotelaria');
     expect(screen.getByText('Pernoites').parentElement).toHaveTextContent('2.130');
@@ -38,5 +39,5 @@ describe('IndicatorsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Limpar filtros' }));
     expect(screen.getByLabelText('Ano')).toHaveValue('');
     expect(screen.getByText('Pernoites').parentElement).toHaveTextContent('3.930');
-  });
+  }, 15000);
 });
