@@ -17,6 +17,13 @@ import { useReports } from './useReports';
 const mockUseReports = vi.mocked(useReports);
 
 describe('Relatórios públicos', () => {
+  it('repassa reports explicitos para o hook, como a prop items do PIT', () => {
+    const reports: [] = [];
+    mockUseReports.mockReturnValue({ reports, status: 'ready', error: null });
+    render(<ReportsSection reports={reports} />);
+    expect(mockUseReports).toHaveBeenCalledWith({ reports });
+    expect(screen.getByText('Nenhum relatório publicado até o momento.')).toBeInTheDocument();
+  });
   it('mostra carregando enquanto busca dados', () => {
     mockUseReports.mockReturnValue({ reports: [], status: 'loading', error: null });
 
@@ -52,7 +59,8 @@ describe('Relatórios públicos', () => {
           id: '9',
           titulo: 'Relatório de teste',
           descricao: 'Descrição',
-          tipo: 'Anual',
+          tipo: 'ANUAL',
+          periodoReferencia: '2025',
           publicadoEm: '2025-06-15',
           arquivoUrl: '/relatorios/teste.pdf',
         },
@@ -77,7 +85,8 @@ describe('Relatórios públicos', () => {
           id: '9',
           titulo: 'Relatório de teste',
           descricao: 'Descrição',
-          tipo: 'Anual',
+          tipo: 'ANUAL',
+          periodoReferencia: '2025',
           publicadoEm: '2025-06-15',
           arquivoUrl: null,
         },
@@ -94,5 +103,6 @@ describe('Relatórios públicos', () => {
 
   it('formata a data de publicação como mês e ano', () => {
     expect(formatReportDate('2025-01-15')).toBe('Jan 2025');
+    expect(formatReportDate('2025-01-15T15:30:00.000Z')).toBe('Jan 2025');
   });
 });

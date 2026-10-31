@@ -1,4 +1,4 @@
-import { PIT_CATEGORIES, formatPitDate, type PitCategory, type PitItem } from './data';
+import { PIT_CATEGORIES, formatPitDate, type PitItem } from './data';
 import { usePit } from './usePit';
 
 export interface PitPageProps {
@@ -6,7 +6,7 @@ export interface PitPageProps {
 }
 
 /** Gradientes de reserva enquanto os itens não tiverem foto cadastrada. */
-const CATEGORY_COVER: Record<PitCategory, string> = {
+const CATEGORY_COVER: Record<string, string> = {
   'Atração Natural': 'from-data-cyan to-data-sky',
   'Museu / Cultura': 'from-brand-blue to-brand-purple',
   Gastronomia: 'from-data-yellow to-brand-magenta',
@@ -38,7 +38,13 @@ export function PitPage({ items: explicitItems }: PitPageProps = {}) {
           <FilterChip active={activeCategory === null} onClick={() => setCategory(null)}>
             Todos
           </FilterChip>
-          {PIT_CATEGORIES.map((option) => (
+          {[
+            ...new Set([
+              ...PIT_CATEGORIES,
+              ...items.map((item) => item.categoria),
+              ...(activeCategory ? [activeCategory] : []),
+            ]),
+          ].map((option) => (
             <FilterChip
               key={option}
               active={activeCategory === option}
@@ -84,7 +90,7 @@ export function PitPage({ items: explicitItems }: PitPageProps = {}) {
                     />
                   ) : (
                     <div
-                      className={`h-full w-full bg-linear-to-br ${CATEGORY_COVER[item.categoria]}`}
+                      className={`h-full w-full bg-linear-to-br ${CATEGORY_COVER[item.categoria] ?? 'from-brand-blue to-brand-purple'}`}
                       aria-hidden="true"
                     />
                   )}

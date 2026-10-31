@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN_SECONDS: z.coerce.number().int().positive().default(3600),
   AUTH_COOKIE_NAME: z.string().min(1).default('observasrs_sessao'),
+  RELATORIOS_STORAGE_DIR: z.string().trim().min(1).default('storage/relatorios'),
 });
 
 const result = envSchema.safeParse(process.env);

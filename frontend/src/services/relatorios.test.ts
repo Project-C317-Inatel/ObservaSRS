@@ -1,126 +1,56 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { api } from './api';
 import {
-  excluirRelatorio,
+  alterarPublicacaoRelatorio,
+  criarRelatorio,
   listarRelatorios,
   resolverUrlDownload,
   uploadRelatorio,
 } from './relatorios';
-
-vi.mock('./api', () => ({
-  api: {
-    get: vi.fn(),
-    post: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
-
-describe('relatorios service', () => {
+import { pagina } from '../test/fixtures';
+vi.mock('./api', () => ({ api: { get: vi.fn(), post: vi.fn(), patch: vi.fn() } }));
+describe('PDFs alinhados ao Swagger', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     vi.unstubAllEnvs();
   });
-
-  describe('resolverUrlDownload', () => {
-    it('retorna null se a URL for null ou vazia', () => {
-      expect(resolverUrlDownload(null)).toBeNull();
-      expect(resolverUrlDownload('')).toBeNull();
-    });
-
-    it('mantém URLs absolutas inalteradas', () => {
-      expect(resolverUrlDownload('https://exemplo.com/relatorio.pdf')).toBe(
-        'https://exemplo.com/relatorio.pdf',
-      );
-      expect(resolverUrlDownload('http://exemplo.com/relatorio.pdf')).toBe(
-        'http://exemplo.com/relatorio.pdf',
-      );
-    });
-
-    it('concatena a URL relativa com VITE_API_URL configurada', () => {
-      vi.stubEnv('VITE_API_URL', 'http://api.local:3333');
-
-      expect(resolverUrlDownload('/relatorios/123/download')).toBe(
-        'http://api.local:3333/relatorios/123/download',
-      );
-      expect(resolverUrlDownload('relatorios/123/download')).toBe(
-        'http://api.local:3333/relatorios/123/download',
-      );
-    });
+  it('resolve download relativo e preserva URL absoluta', () => {
+    vi.stubEnv('VITE_API_URL', 'http://api.local:3333');
+    expect(resolverUrlDownload('/relatorios/id/arquivo')).toBe(
+      'http://api.local:3333/relatorios/id/arquivo',
+    );
+    expect(resolverUrlDownload('https://exemplo.com/a.pdf')).toBe('https://exemplo.com/a.pdf');
+    expect(resolverUrlDownload(null)).toBeNull();
   });
-
-  describe('listarRelatorios', () => {
-    it('chama GET /relatorios sem parâmetro quando nenhum tipo é fornecido', async () => {
-      const mockResponse = { relatorios: [] };
-      vi.mocked(api.get).mockResolvedValueOnce(mockResponse);
-
-      const resultado = await listarRelatorios();
-
-      expect(api.get).toHaveBeenCalledWith('/relatorios');
-      expect(resultado).toEqual(mockResponse);
-    });
-
-    it('inclui tipo codificado na query string quando fornecido', async () => {
-      const mockResponse = {
-        relatorios: [
-          {
-            id: 'rel-1',
-            titulo: 'Relatório Trimestral Q1',
-            descricao: 'Dados do primeiro trimestre.',
-            tipo: 'Trimestral' as const,
-            publicadoEm: '2026-04-01',
-            arquivoUrl: '/relatorios/rel-1/download',
-          },
-        ],
-      };
-      vi.mocked(api.get).mockResolvedValueOnce(mockResponse);
-
-      const resultado = await listarRelatorios('Trimestral');
-
-      expect(api.get).toHaveBeenCalledWith('/relatorios?tipo=Trimestral');
-      expect(resultado).toEqual(mockResponse);
-    });
+  it('consulta enum em maiusculas e paginas', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(pagina('relatorios', []));
+    expect(await listarRelatorios('TRIMESTRAL')).toEqual({ relatorios: [] });
+    expect(api.get).toHaveBeenCalledWith('/relatorios?tipo=TRIMESTRAL&pagina=1&limite=100');
   });
-
-  describe('uploadRelatorio', () => {
-    it('chama POST /admin/relatorios com FormData', async () => {
-      const formData = new FormData();
-      formData.append('titulo', 'Novo Relatório');
-      const mockResponse = {
-        message: 'Relatório enviado com sucesso.',
-        relatorio: {
-          id: 'rel-novo',
-          titulo: 'Novo Relatório',
-          descricao: 'Desc',
-          tipo: 'Setorial' as const,
-          publicadoEm: '2026-05-01',
-          arquivoUrl: '/relatorios/rel-novo/download',
-        },
-      };
-      vi.mocked(api.post).mockResolvedValueOnce(mockResponse);
-
-      const resultado = await uploadRelatorio(formData);
-
-      expect(api.post).toHaveBeenCalledWith('/admin/relatorios', formData);
-      expect(resultado).toEqual(mockResponse);
-    });
+  it('cadastra JSON antes de enviar somente o PDF', async () => {
+    const dados = {
+      titulo: 'Relatorio exemplo',
+      tipo: 'ANUAL' as const,
+      periodoReferencia: '2026',
+    };
+    await criarRelatorio(dados);
+    const arquivo = new File(['%PDF-'], 'exemplo.pdf', { type: 'application/pdf' });
+    await uploadRelatorio('id', arquivo);
+    expect(api.post).toHaveBeenNthCalledWith(1, '/admin/relatorios', dados);
+    const [path, body] = vi.mocked(api.post).mock.calls[1]!;
+    expect(path).toBe('/admin/relatorios/id/arquivo');
+    expect(body).toBeInstanceOf(FormData);
+    expect([...(body as FormData).keys()]).toEqual(['arquivo']);
+    expect((body as FormData).get('arquivo')).toBe(arquivo);
   });
-
-  describe('excluirRelatorio', () => {
-    it('chama DELETE /admin/relatorios/:id', async () => {
-      vi.mocked(api.delete).mockResolvedValueOnce(undefined);
-
-      await excluirRelatorio('rel-1');
-
-      expect(api.delete).toHaveBeenCalledWith('/admin/relatorios/rel-1');
+  it('publica e despublica sem excluir o historico', async () => {
+    await alterarPublicacaoRelatorio('id', true);
+    await alterarPublicacaoRelatorio('id', false);
+    expect(api.patch).toHaveBeenNthCalledWith(1, '/admin/relatorios/id/publicacao', {
+      publicado: true,
     });
-  });
-
-  describe('propagação de erros', () => {
-    it('propaga erro rejeitado pela chamada da api', async () => {
-      vi.mocked(api.get).mockRejectedValueOnce(new Error('Falha ao listar relatórios'));
-
-      await expect(listarRelatorios()).rejects.toThrow('Falha ao listar relatórios');
+    expect(api.patch).toHaveBeenNthCalledWith(2, '/admin/relatorios/id/publicacao', {
+      publicado: false,
     });
   });
 });

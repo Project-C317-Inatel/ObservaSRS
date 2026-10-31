@@ -74,17 +74,38 @@ export interface ColetaAutonomaResponse {
 export interface ColetaAdminItem extends ColetaAutonomaRequest {
   id: string;
   status: RequestStatus;
-  criadoEm: string;
+  estabelecimentoId: string;
+  publicado: boolean;
+  enviadoEm: string;
+  atualizadoEm: string;
+  validadoEm: string | null;
+  validadoPorId: string | null;
+  publicadoEm: string | null;
+  estabelecimento: { id: string; nome: string; cnpjCadastur: string; tipo: string; ativo: boolean };
+  validadoPor: { id: string; nome: string } | null;
+}
+
+export interface Paginacao {
+  pagina: number;
+  limite: number;
+  total: number;
+  totalPaginas: number;
+}
+
+export interface ColetaResponse {
+  message: string;
+  coleta: ColetaAdminItem;
 }
 
 export interface ListColetasResponse {
   coletas: ColetaAdminItem[];
+  paginacao: Paginacao;
 }
 
 export interface Setor {
   id: string;
   nome: string;
-  descricao: string;
+  descricao: string | null;
 }
 
 export interface ListSetoresResponse {
@@ -94,13 +115,10 @@ export interface ListSetoresResponse {
 export interface Indicador {
   id: string;
   nome: string;
-  codigo: string;
   unidade: string;
-  descricao: string;
-  setor: {
-    id: string;
-    nome: string;
-  };
+  descricao: string | null;
+  setorId: string;
+  setor: Setor;
 }
 
 export interface ListIndicadoresResponse {
@@ -110,10 +128,15 @@ export interface ListIndicadoresResponse {
 export interface RegistroIndicador {
   id: string;
   indicadorId: string;
-  indicadorNome: string;
-  indicadorCodigo: string;
-  unidade: string;
-  setorNome: string;
+  fonteId: string;
+  indicador: Indicador;
+  fonte: {
+    id: string;
+    nome: string;
+    tipo: string;
+    descricao: string | null;
+    referencia: string | null;
+  };
   periodo: string;
   valor: string;
 }
@@ -133,8 +156,7 @@ export interface CreateRegistroRequest {
 
 export interface UpdateRegistroRequest {
   valor?: string;
-  observacao?: string;
-  publicado?: boolean;
+  observacao?: string | null;
   periodo?: string;
   fonteId?: string;
   indicadorId?: string;
@@ -161,7 +183,7 @@ export interface RegistroResponse {
   registro: RegistroAdminItem;
 }
 
-export interface HighlightMetric {
+export interface ApiHighlightMetric {
   id: string;
   valor: number;
   rotulo: string;
@@ -169,16 +191,17 @@ export interface HighlightMetric {
 }
 
 export interface ListHighlightMetricsResponse {
-  destaques: HighlightMetric[];
+  destaques: ApiHighlightMetric[];
 }
 
-export type ReportType = 'Trimestral' | 'Setorial' | 'Anual';
+export type ReportType = 'TRIMESTRAL' | 'SETORIAL' | 'ANUAL';
 
 export interface PublicReport {
   id: string;
   titulo: string;
-  descricao: string;
+  descricao: string | null;
   tipo: ReportType;
+  periodoReferencia: string;
   publicadoEm: string;
   arquivoUrl: string | null;
 }
@@ -187,32 +210,39 @@ export interface ListReportsResponse {
   relatorios: PublicReport[];
 }
 
-export interface CreateReportFormData {
+export interface CreateReportRequest {
   titulo: string;
-  descricao: string;
+  descricao?: string;
   tipo: ReportType;
-  publicadoEm: string;
-  arquivo: File | Blob;
+  periodoReferencia: string;
+}
+
+export interface AdminReport extends Omit<CreateReportRequest, 'descricao'> {
+  id: string;
+  descricao: string | null;
+  arquivoNome: string | null;
+  arquivoTamanho: number | null;
+  arquivoUrl: string | null;
+  criadoPorId: string;
+  criadoPor: { id: string; nome: string };
+  publicado: boolean;
+  criadoEm: string;
+  atualizadoEm: string;
+  publicadoEm: string | null;
 }
 
 export interface ReportResponse {
   message: string;
-  relatorio: PublicReport;
+  relatorio: AdminReport;
 }
 
-export type PitCategory =
-  | 'Atração Natural'
-  | 'Museu / Cultura'
-  | 'Gastronomia'
-  | 'Parque Urbano'
-  | 'Evento / Comércio'
-  | 'Arte / Cultura';
+export type PitCategory = string;
 
 export interface PitItem {
   id: string;
   nome: string;
   categoria: PitCategory;
-  descricao: string;
+  descricao: string | null;
   imagemUrl: string | null;
   localizacao: string;
   atualizadoEm: string;
@@ -225,20 +255,32 @@ export interface ListPitResponse {
 export interface CreatePitItemRequest {
   nome: string;
   categoria: PitCategory;
-  descricao: string;
+  descricao?: string;
   localizacao: string;
   imagemUrl?: string | null;
+  ativo?: boolean;
+  revisaoPrevistaEm?: string;
 }
 
 export interface UpdatePitItemRequest {
   nome?: string;
   categoria?: PitCategory;
-  descricao?: string;
+  descricao?: string | null;
   localizacao?: string;
   imagemUrl?: string | null;
+  ativo?: boolean;
+  revisaoPrevistaEm?: string;
+}
+
+export interface AdminPitItem extends PitItem {
+  ativo: boolean;
+  criadoEm: string;
+  revisadoEm: string;
+  revisaoPrevistaEm: string;
+  revisaoPendente: boolean;
 }
 
 export interface PitItemResponse {
   message: string;
-  item: PitItem;
+  item: AdminPitItem;
 }

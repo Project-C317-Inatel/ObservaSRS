@@ -140,7 +140,7 @@ describe('registros service', () => {
 
       const resultado = await alterarPublicacaoRegistro('reg-1', true);
 
-      expect(api.patch).toHaveBeenCalledWith('/admin/registros-indicadores/reg-1', {
+      expect(api.patch).toHaveBeenCalledWith('/admin/registros-indicadores/reg-1/publicacao', {
         publicado: true,
       });
       expect(resultado).toEqual(mockResponse);
@@ -151,7 +151,7 @@ describe('registros service', () => {
 
       await alterarPublicacaoRegistro('reg-1', false);
 
-      expect(api.patch).toHaveBeenCalledWith('/admin/registros-indicadores/reg-1', {
+      expect(api.patch).toHaveBeenCalledWith('/admin/registros-indicadores/reg-1/publicacao', {
         publicado: false,
       });
     });

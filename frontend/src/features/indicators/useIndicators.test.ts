@@ -29,6 +29,7 @@ import { isMockMode, shouldUseFallback } from '../../services/fallback';
 import { listarRegistrosPublicados } from '../../services/indicadores';
 import { adaptIndicatorRecords } from './adapter';
 import { INDICATOR_DATA } from './data';
+import { registroPublico } from '../../test/fixtures';
 
 const mockIsMockMode = vi.mocked(isMockMode);
 const mockShouldUseFallback = vi.mocked(shouldUseFallback);
@@ -144,18 +145,7 @@ describe('useIndicators — registros explícitos (comportamento legado)', () =>
 
 describe('useIndicators — cenário 1: sucesso da API', () => {
   it('busca registros da API, adapta e exibe status ready', async () => {
-    const registrosApi = [
-      {
-        id: '1',
-        periodo: '2026-01',
-        setorNome: 'Hotelaria',
-        indicadorCodigo: 'visitantes',
-        indicadorNome: 'Visitantes',
-        unidade: 'pessoas',
-        valor: '500',
-        indicadorId: 'ind-1',
-      },
-    ];
+    const registrosApi = [registroPublico('Visitantes', '500.00')];
 
     const adaptedRecords = [
       { period: '2026-01', year: 2026, sector: 'Hotelaria', visitors: 500, secondaryMetrics: {} },

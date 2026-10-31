@@ -1,5 +1,7 @@
 # Plano de Implementação: Integração Frontend-Backend, Camada de Serviços e Mocks (Semana 30/10)
 
+> Registro do planejamento anterior a integracao com o backend atual. As propostas de rotas e tipos abaixo foram substituidas pelos contratos documentados em [integracao-frontend-api.md](../../integracao-frontend-api.md) e no Swagger. Para manutencao, use esses contratos atuais.
+
 ## 1. Abordagem Técnica e Arquitetura
 
 O objetivo é transformar a camada de dados do frontend do ObservaSRS em uma estrutura desacoplada, resiliente e pronta para produção, conectando as telas existentes à API REST e garantindo que o desenvolvimento visual não seja bloqueado pelas rotas ainda em construção no backend.
@@ -122,7 +124,7 @@ O objetivo é transformar a camada de dados do frontend do ObservaSRS em uma est
 
 ## 4. Estratégia de Testes
 
-Seguindo o padrão arquitetural do projeto e as convenções do `AGENTS.md`:
+Seguindo o padrão arquitetural e as convenções do projeto:
 
 1. **Testes de Serviços (`services/*.test.ts`)**:
    - Usar `vi.mock('./api')` simulando os métodos do objeto `api` (`get`, `post`, `patch`, `delete`).

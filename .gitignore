@@ -7,6 +7,7 @@ coverage/
 backend/reports/
 backend/.vitest/
 backend/src/generated/prisma/
+backend/storage/
 
 # Environment variables
 .env

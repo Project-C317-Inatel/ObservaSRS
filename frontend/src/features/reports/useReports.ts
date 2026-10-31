@@ -7,18 +7,25 @@ import { PUBLIC_REPORTS } from './data';
 
 export type ReportsStatus = 'loading' | 'ready' | 'error';
 
+export interface UseReportsOptions {
+  reports?: readonly PublicReport[];
+}
+
 export interface UseReportsResult {
   reports: readonly PublicReport[];
   status: ReportsStatus;
   error: Error | null;
 }
 
-export function useReports(): UseReportsResult {
-  const [reports, setReports] = useState<readonly PublicReport[]>([]);
-  const [status, setStatus] = useState<ReportsStatus>('loading');
+export function useReports(options: UseReportsOptions = {}): UseReportsResult {
+  const explicitReports = options.reports;
+  const useExplicit = explicitReports !== undefined;
+  const [fetchedReports, setReports] = useState<readonly PublicReport[]>([]);
+  const [status, setStatus] = useState<ReportsStatus>(() => (useExplicit ? 'ready' : 'loading'));
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    if (useExplicit) return;
     let cancelled = false;
 
     const resolveReports = isMockMode()
@@ -51,7 +58,11 @@ export function useReports(): UseReportsResult {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [useExplicit]);
 
-  return { reports, status, error };
+  return {
+    reports: useExplicit ? explicitReports : fetchedReports,
+    status: useExplicit ? 'ready' : status,
+    error: useExplicit ? null : error,
+  };
 }

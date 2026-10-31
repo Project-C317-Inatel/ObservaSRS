@@ -2,12 +2,16 @@ import type { RequestHandler } from 'express';
 
 import {
   cadastroRegistroIndicadorSchema,
+  edicaoRegistroIndicadorSchema,
   listarRegistrosIndicadoresSchema,
+  publicacaoRegistroIndicadorSchema,
   registroIndicadorIdSchema,
 } from './registro-indicador.schemas.js';
 import {
+  alterarPublicacaoRegistroIndicador,
   buscarRegistroIndicador,
   cadastrarRegistroIndicador,
+  editarRegistroIndicador,
   listarRegistrosIndicadores,
 } from './registro-indicador.service.js';
 
@@ -25,6 +29,30 @@ export const cadastrar: RequestHandler = async (request, response) => {
 
   response.status(201).json({
     message: 'Registro de indicador cadastrado com sucesso.',
+    registro: apresentarRegistro(registro),
+  });
+};
+
+export const editar: RequestHandler = async (request, response) => {
+  const { id } = registroIndicadorIdSchema.parse(request.params);
+  const dados = edicaoRegistroIndicadorSchema.parse(request.body);
+  const registro = await editarRegistroIndicador(id, dados);
+
+  response.status(200).json({
+    message: 'Registro de indicador atualizado com sucesso.',
+    registro: apresentarRegistro(registro),
+  });
+};
+
+export const alterarPublicacao: RequestHandler = async (request, response) => {
+  const { id } = registroIndicadorIdSchema.parse(request.params);
+  const dados = publicacaoRegistroIndicadorSchema.parse(request.body);
+  const registro = await alterarPublicacaoRegistroIndicador(id, dados);
+
+  response.status(200).json({
+    message: dados.publicado
+      ? 'Registro publicado com sucesso.'
+      : 'Registro despublicado com sucesso.',
     registro: apresentarRegistro(registro),
   });
 };

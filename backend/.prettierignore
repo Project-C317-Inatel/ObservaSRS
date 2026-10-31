@@ -1,14 +1,9 @@
 coverage/
 reports/
 .vitest/
-<<<<<<< HEAD
-.agents/
-.claude/
-.windsurf/
-=======
->>>>>>> c02863b79eef15546b2746f0f0f7ccc3b743c20b
 dist/
 node_modules/
 package-lock.json
 src/generated/prisma/
+storage/
 

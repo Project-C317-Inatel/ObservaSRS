@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { api } from './api';
-import { aprovarColeta, enviarColeta, listarColetasAdmin, rejeitarColeta } from './coleta';
+import {
+  alterarPublicacaoColeta,
+  aprovarColeta,
+  enviarColeta,
+  listarColetasAdmin,
+  rejeitarColeta,
+} from './coleta';
 import type { ColetaAutonomaRequest, ColetaAutonomaResponse } from '../types';
 
 vi.mock('./api', () => ({
@@ -26,15 +32,19 @@ const mockResponse: ColetaAutonomaResponse = {
 };
 
 describe('coleta service', () => {
+  it('envia publicacao para a rota especifica, separada da aprovacao', async () => {
+    await alterarPublicacaoColeta('col-1', true);
+    expect(api.patch).toHaveBeenCalledWith('/admin/coletas/col-1/publicacao', { publicado: true });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('enviarColeta', () => {
-    it('deve chamar api.post com /coletas e body correto', async () => {
+    it('deve chamar api.post com /api/coletas e body correto', async () => {
       vi.mocked(api.post).mockResolvedValue(mockResponse);
       const result = await enviarColeta(mockData);
-      expect(api.post).toHaveBeenCalledWith('/coletas', mockData);
+      expect(api.post).toHaveBeenCalledWith('/api/coletas', mockData);
       expect(result).toEqual(mockResponse);
     });
 
@@ -67,7 +77,7 @@ describe('coleta service', () => {
             leitosOcupados: 25,
             origemVisitantes: 'sudeste',
             status: 'PENDENTE' as const,
-            criadoEm: '2026-10-28T18:00:00.000Z',
+            enviadoEm: '2026-10-28T18:00:00.000Z',
           },
         ],
       };
@@ -93,15 +103,13 @@ describe('coleta service', () => {
   });
 
   describe('rejeitarColeta', () => {
-    it('deve chamar PATCH /admin/coletas/:id/rejeitar com motivo quando informado', async () => {
+    it('deve chamar PATCH /admin/coletas/:id/rejeitar sem enviar campos adicionais', async () => {
       const mockRejectResponse = { message: 'Coleta rejeitada.' };
       vi.mocked(api.patch).mockResolvedValueOnce(mockRejectResponse);
 
-      const result = await rejeitarColeta('col-1', 'CNPJ não encontrado no Cadastur.');
+      const result = await rejeitarColeta('col-1');
 
-      expect(api.patch).toHaveBeenCalledWith('/admin/coletas/col-1/rejeitar', {
-        motivo: 'CNPJ não encontrado no Cadastur.',
-      });
+      expect(api.patch).toHaveBeenCalledWith('/admin/coletas/col-1/rejeitar');
       expect(result).toEqual(mockRejectResponse);
     });
 
@@ -110,7 +118,7 @@ describe('coleta service', () => {
 
       await rejeitarColeta('col-1');
 
-      expect(api.patch).toHaveBeenCalledWith('/admin/coletas/col-1/rejeitar', undefined);
+      expect(api.patch).toHaveBeenCalledWith('/admin/coletas/col-1/rejeitar');
     });
   });
 });

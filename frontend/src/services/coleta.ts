@@ -4,22 +4,40 @@ import type {
   ColetaAutonomaResponse,
   ListColetasResponse,
   RequestStatus,
+  ColetaResponse,
 } from '../types';
 
 export function enviarColeta(data: ColetaAutonomaRequest): Promise<ColetaAutonomaResponse> {
-  return api.post<ColetaAutonomaResponse>('/coletas', data);
+  return api.post<ColetaAutonomaResponse>('/api/coletas', data);
 }
 
-export function listarColetasAdmin(status?: RequestStatus): Promise<ListColetasResponse> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+export function listarColetasAdmin(
+  status?: RequestStatus,
+  filtros: {
+    pagina?: number;
+    limite?: number;
+    estabelecimentoId?: string;
+    periodoReferencia?: string;
+    publicado?: boolean;
+  } = {},
+): Promise<ListColetasResponse> {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  for (const [campo, valor] of Object.entries(filtros)) {
+    if (valor !== undefined) params.set(campo, String(valor));
+  }
+  const query = params.size ? `?${params}` : '';
   return api.get<ListColetasResponse>(`/admin/coletas${query}`);
 }
 
-export function aprovarColeta(id: string): Promise<{ message: string }> {
-  return api.patch<{ message: string }>(`/admin/coletas/${id}/aprovar`);
+export function aprovarColeta(id: string): Promise<ColetaResponse> {
+  return api.patch<ColetaResponse>(`/admin/coletas/${id}/aprovar`);
 }
 
-export function rejeitarColeta(id: string, motivo?: string): Promise<{ message: string }> {
-  const body = motivo ? { motivo } : undefined;
-  return api.patch<{ message: string }>(`/admin/coletas/${id}/rejeitar`, body);
+export function rejeitarColeta(id: string): Promise<ColetaResponse> {
+  return api.patch<ColetaResponse>(`/admin/coletas/${id}/rejeitar`);
+}
+
+export function alterarPublicacaoColeta(id: string, publicado: boolean): Promise<ColetaResponse> {
+  return api.patch<ColetaResponse>(`/admin/coletas/${id}/publicacao`, { publicado });
 }

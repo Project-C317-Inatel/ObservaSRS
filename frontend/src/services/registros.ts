@@ -58,5 +58,7 @@ export function alterarPublicacaoRegistro(
   id: string,
   publicado: boolean,
 ): Promise<RegistroResponse> {
-  return api.patch<RegistroResponse>(`/admin/registros-indicadores/${id}`, { publicado });
+  return api.patch<RegistroResponse>(`/admin/registros-indicadores/${id}/publicacao`, {
+    publicado,
+  });
 }

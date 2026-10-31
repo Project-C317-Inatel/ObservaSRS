@@ -1,12 +1,20 @@
 import { resolverUrlDownload } from '../../services/relatorios';
 import { formatReportDate } from './data';
 import { useReports } from './useReports';
+import type { PublicReport } from '../../types';
 
 const downloadClass =
   'mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition';
+const nomesTipos = { TRIMESTRAL: 'Trimestral', SETORIAL: 'Setorial', ANUAL: 'Anual' };
 
-export function ReportsSection() {
-  const { reports, status, error } = useReports();
+export interface ReportsSectionProps {
+  reports?: readonly PublicReport[];
+}
+
+export function ReportsSection({ reports: explicitReports }: ReportsSectionProps = {}) {
+  const { reports, status, error } = useReports(
+    explicitReports !== undefined ? { reports: explicitReports } : undefined,
+  );
 
   return (
     <section
@@ -49,7 +57,7 @@ export function ReportsSection() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="rounded-md bg-brand-magenta/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-brand-magenta">
-                      {report.tipo}
+                      {nomesTipos[report.tipo]}
                     </span>
                     <time className="text-xs text-slate-500" dateTime={report.publicadoEm}>
                       {formatReportDate(report.publicadoEm)}
