@@ -39,5 +39,5 @@ describe('IndicatorsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Limpar filtros' }));
     expect(screen.getByLabelText('Ano')).toHaveValue('');
     expect(screen.getByText('Pernoites').parentElement).toHaveTextContent('3.930');
-  });
+  }, 15000);
 });

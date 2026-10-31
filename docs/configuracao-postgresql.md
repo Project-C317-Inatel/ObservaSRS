@@ -136,7 +136,7 @@ essa dificuldade no primeiro ambiente local, pode-se utilizar uma senha longa co
 
 ## 6. Instalar as dependencias
 
-Na pasta `back`, execute:
+Na pasta `backend`, execute:
 
 ```powershell
 npm ci
