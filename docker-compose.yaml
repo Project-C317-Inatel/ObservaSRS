@@ -1,0 +1,73 @@
+services:
+  # Banco de dados PostgreSQL
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-observasrs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-observasrs}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Executa migrations e Seed
+  migrate:
+    build:
+      context: ./backend
+      target: migrate
+    restart: "no"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Defina DATABASE_URL no .env}
+      SUPER_ADMIN_SEED_NOME: ${SUPER_ADMIN_SEED_NOME:?Defina SUPER_ADMIN_SEED_NOME no .env}
+      SUPER_ADMIN_SEED_EMAIL: ${SUPER_ADMIN_SEED_EMAIL:?Defina SUPER_ADMIN_SEED_EMAIL no .env}
+      SUPER_ADMIN_SEED_SENHA: ${SUPER_ADMIN_SEED_SENHA:?Defina SUPER_ADMIN_SEED_SENHA no .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npm run db:deploy && npm run db:seed"
+
+  # API backend
+  backend:
+    build:
+      context: ./backend
+      target: runtime
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      DATABASE_URL: ${DATABASE_URL:?Defina DATABASE_URL no .env}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-observasrs_sessao}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    ports:
+      - "3333:3333"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Frontend React servido pelo Nginx
+  frontend:
+    build:
+      context: ./frontend
+      target: runtime
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3333}
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
