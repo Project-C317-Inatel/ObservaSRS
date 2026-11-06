@@ -17,6 +17,11 @@
 
   /* Fundo creme do hero */
   --color-surface-cream: #faf7f2;
+
+    /* Fontes do hero */
+  --font-hand: 'Gaegu', cursive;
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-body: 'Poppins', system-ui, sans-serif;
 }
 
 @utility bg-brand-gradient {
