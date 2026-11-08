@@ -1,5 +1,7 @@
 # Especificação Técnica: Integração Frontend-Backend, Camada de Serviços e Mocks (Semana 30/10)
 
+> Registro do planejamento anterior a integracao com o backend atual. As propostas de rotas e tipos abaixo foram substituidas pelos contratos documentados em [integracao-frontend-api.md](../../integracao-frontend-api.md) e no Swagger. Para manutencao, use esses contratos atuais.
+
 ## 1. Contexto e Motivação
 
 O **ObservaSRS** é a plataforma do Observatório do Turismo de Santa Rita do Sapucaí (SMCELT / Inatel - C317).

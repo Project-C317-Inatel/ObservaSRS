@@ -20,6 +20,9 @@ const mockIsMockMode = vi.mocked(isMockMode);
 const mockShouldUseFallback = vi.mocked(shouldUseFallback);
 
 describe('Inventário PIT', () => {
+  it('formata timestamps ISO da API sem acrescentar uma segunda hora', () => {
+    expect(formatPitDate('2026-10-29T15:30:00.000Z')).toBe('29/10/2026');
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsMockMode.mockReturnValue(false);

@@ -19,20 +19,29 @@ enum StatusContaAdmin {
   REJEITADO
 }
 
+enum TipoRelatorio {
+  TRIMESTRAL
+  SETORIAL
+  ANUAL
+}
+
 model UsuarioAdmin {
-  id              String           @id @default(uuid())
-  nome            String           @db.VarChar(120)
-  email           String           @unique @db.VarChar(160)
-  senhaHash       String           @map("senha_hash") @db.VarChar(255)
-  papel           PapelAdmin       @default(ADMIN)
-  status          StatusContaAdmin @default(PENDENTE)
-  ativo           Boolean          @default(false)
-  avaliadoEm      DateTime?        @map("avaliado_em")
-  avaliadoPorId   String?          @map("avaliado_por_id")
-  criadoEm        DateTime         @default(now()) @map("criado_em")
-  atualizadoEm    DateTime         @updatedAt @map("atualizado_em")
-  avaliadoPor     UsuarioAdmin?    @relation("AvaliacaoContasAdmin", fields: [avaliadoPorId], references: [id], onDelete: SetNull)
-  contasAvaliadas UsuarioAdmin[]   @relation("AvaliacaoContasAdmin")
+  id                String            @id @default(uuid())
+  nome              String            @db.VarChar(120)
+  email             String            @unique @db.VarChar(160)
+  senhaHash         String            @map("senha_hash") @db.VarChar(255)
+  papel             PapelAdmin        @default(ADMIN)
+  status            StatusContaAdmin  @default(PENDENTE)
+  ativo             Boolean           @default(false)
+  versaoSessao      Int               @default(0) @map("versao_sessao")
+  avaliadoEm        DateTime?         @map("avaliado_em")
+  avaliadoPorId     String?           @map("avaliado_por_id")
+  criadoEm          DateTime          @default(now()) @map("criado_em")
+  atualizadoEm      DateTime          @updatedAt @map("atualizado_em")
+  avaliadoPor       UsuarioAdmin?     @relation("AvaliacaoContasAdmin", fields: [avaliadoPorId], references: [id], onDelete: SetNull)
+  contasAvaliadas   UsuarioAdmin[]    @relation("AvaliacaoContasAdmin")
+  relatoriosCriados Relatorio[]
+  coletasAvaliadas  SubmissaoColeta[]
 
   @@index([status])
   @@index([avaliadoPorId])
@@ -92,4 +101,88 @@ model RegistroIndicador {
   @@index([fonteId])
   @@index([periodo])
   @@map("registro_indicador")
+}
+
+model Relatorio {
+  id                String        @id @default(uuid())
+  titulo            String        @db.VarChar(180)
+  descricao         String?       @db.Text
+  tipo              TipoRelatorio
+  periodoReferencia String        @map("periodo_referencia") @db.VarChar(30)
+  arquivoChave      String?       @unique @map("arquivo_chave") @db.VarChar(80)
+  arquivoNome       String?       @map("arquivo_nome") @db.VarChar(255)
+  arquivoTamanho    Int?          @map("arquivo_tamanho")
+  criadoPorId       String        @map("criado_por")
+  publicado         Boolean       @default(false)
+  criadoEm          DateTime      @default(now()) @map("criado_em")
+  atualizadoEm      DateTime      @updatedAt @map("atualizado_em")
+  publicadoEm       DateTime?     @map("publicado_em")
+  criadoPor         UsuarioAdmin  @relation(fields: [criadoPorId], references: [id], onDelete: Restrict)
+
+  @@index([criadoPorId])
+  @@index([publicado, publicadoEm])
+  @@index([tipo, periodoReferencia])
+  @@map("relatorio")
+}
+
+enum StatusColeta {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+model ItemPit {
+  id                String   @id @default(uuid())
+  nome              String   @db.VarChar(150)
+  categoria         String   @db.VarChar(80)
+  descricao         String?  @db.Text
+  imagemUrl         String?  @map("imagem_url") @db.Text
+  localizacao       String   @db.VarChar(150)
+  ativo             Boolean  @default(true)
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+  revisadoEm        DateTime @default(now()) @map("revisado_em")
+  revisaoPrevistaEm DateTime @map("revisao_prevista_em") @db.Date
+
+  @@index([ativo, categoria])
+  @@index([revisaoPrevistaEm])
+  @@map("item_pit")
+}
+
+model Estabelecimento {
+  id           String            @id @default(uuid())
+  nome         String            @db.VarChar(150)
+  cnpjCadastur String            @unique @map("cnpj_cadastur") @db.VarChar(30)
+  tipo         String            @db.VarChar(80)
+  ativo        Boolean           @default(true)
+  criadoEm     DateTime          @default(now()) @map("criado_em")
+  atualizadoEm DateTime          @updatedAt @map("atualizado_em")
+  coletas      SubmissaoColeta[]
+
+  @@index([ativo])
+  @@map("estabelecimento")
+}
+
+model SubmissaoColeta {
+  id                  String          @id @default(uuid())
+  estabelecimentoId   String          @map("estabelecimento_id")
+  nomeEstabelecimento String          @map("nome_estabelecimento") @db.VarChar(150)
+  cnpjCadastur        String          @map("cnpj_cadastur") @db.VarChar(30)
+  periodo             DateTime        @db.Date
+  leitosOcupados      Int             @map("leitos_ocupados")
+  origemVisitantes    String          @map("origem_visitantes") @db.VarChar(120)
+  status              StatusColeta    @default(PENDENTE)
+  publicado           Boolean         @default(false)
+  enviadoEm           DateTime        @default(now()) @map("enviado_em")
+  atualizadoEm        DateTime        @updatedAt @map("atualizado_em")
+  validadoEm          DateTime?       @map("validado_em")
+  validadoPorId       String?         @map("validado_por")
+  publicadoEm         DateTime?       @map("publicado_em")
+  estabelecimento     Estabelecimento @relation(fields: [estabelecimentoId], references: [id], onDelete: Restrict)
+  validadoPor         UsuarioAdmin?   @relation(fields: [validadoPorId], references: [id], onDelete: SetNull)
+
+  @@unique([estabelecimentoId, periodo])
+  @@index([status, periodo])
+  @@index([validadoPorId])
+  @@map("submissao_coleta")
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const periodoSchema = z.iso
+export const periodoSchema = z.iso
   .date()
   .refine((data) => !data.startsWith('0000'), 'O ano deve ser maior que zero.')
   .transform((data) => new Date(`${data}T00:00:00.000Z`));
@@ -22,6 +22,19 @@ export const cadastroRegistroIndicadorSchema = z.object({
   publicado: z.boolean().default(false),
   observacao: z.string().trim().max(2000).optional(),
 });
+
+export const edicaoRegistroIndicadorSchema = cadastroRegistroIndicadorSchema
+  .omit({ publicado: true })
+  .partial()
+  .extend({
+    observacao: cadastroRegistroIndicadorSchema.shape.observacao.unwrap().nullable().optional(),
+  })
+  .strict()
+  .refine((dados) => Object.values(dados).some((valor) => valor !== undefined), {
+    message: 'Informe ao menos um campo para atualizar.',
+  });
+
+export const publicacaoRegistroIndicadorSchema = z.object({ publicado: z.boolean() }).strict();
 
 export const listarRegistrosIndicadoresSchema = z
   .object({
@@ -45,4 +58,6 @@ export const registroIndicadorIdSchema = z.object({
 });
 
 export type CadastroRegistroIndicadorInput = z.infer<typeof cadastroRegistroIndicadorSchema>;
+export type EdicaoRegistroIndicadorInput = z.infer<typeof edicaoRegistroIndicadorSchema>;
+export type PublicacaoRegistroIndicadorInput = z.infer<typeof publicacaoRegistroIndicadorSchema>;
 export type ListarRegistrosIndicadoresInput = z.infer<typeof listarRegistrosIndicadoresSchema>;

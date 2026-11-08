@@ -1,3 +1,4 @@
+import { Prisma } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { prisma } from '../../shared/database/prisma.js';
 import type { StatusSolicitacao } from './admin.schemas.js';
@@ -15,10 +16,11 @@ const dadosPublicosSolicitacao = {
   atualizadoEm: true,
 } as const;
 
-export function listarSolicitacoes(status: StatusSolicitacao) {
+export function listarSolicitacoes(status: StatusSolicitacao, ativo?: boolean) {
   return prisma.usuarioAdmin.findMany({
     where: {
       status,
+      ativo,
       papel: { not: 'SUPER_ADMIN' },
     },
     select: dadosPublicosSolicitacao,
@@ -46,32 +48,118 @@ async function buscarSolicitacaoPendente(id: string) {
   return solicitacao;
 }
 
-export async function aprovarSolicitacao(id: string, superAdminId: string) {
+async function avaliarSolicitacao(
+  id: string,
+  superAdminId: string,
+  status: 'APROVADO' | 'REJEITADO',
+) {
   await buscarSolicitacaoPendente(id);
 
-  return prisma.usuarioAdmin.update({
-    where: { id },
-    data: {
-      status: 'APROVADO',
-      ativo: true,
-      avaliadoEm: new Date(),
-      avaliadoPorId: superAdminId,
-    },
-    select: dadosPublicosSolicitacao,
-  });
+  try {
+    return await prisma.usuarioAdmin.update({
+      where: { id, status: 'PENDENTE', papel: { not: 'SUPER_ADMIN' } },
+      data: {
+        status,
+        ativo: status === 'APROVADO',
+        avaliadoEm: new Date(),
+        avaliadoPorId: superAdminId,
+      },
+      select: dadosPublicosSolicitacao,
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      await buscarSolicitacaoPendente(id);
+      throw new AppError(
+        409,
+        'account_request_changed',
+        'A solicitacao mudou durante a avaliacao. Consulte novamente e tente outra vez.',
+      );
+    }
+
+    throw error;
+  }
 }
 
-export async function rejeitarSolicitacao(id: string, superAdminId: string) {
-  await buscarSolicitacaoPendente(id);
+export function aprovarSolicitacao(id: string, superAdminId: string) {
+  return avaliarSolicitacao(id, superAdminId, 'APROVADO');
+}
 
-  return prisma.usuarioAdmin.update({
+export function rejeitarSolicitacao(id: string, superAdminId: string) {
+  return avaliarSolicitacao(id, superAdminId, 'REJEITADO');
+}
+
+async function buscarContaAprovada(id: string, superAdminId: string) {
+  if (id === superAdminId) {
+    throw new AppError(
+      403,
+      'self_account_change_forbidden',
+      'Nao e permitido alterar o proprio acesso por esta rota.',
+    );
+  }
+
+  const conta = await prisma.usuarioAdmin.findUnique({
     where: { id },
-    data: {
-      status: 'REJEITADO',
-      ativo: false,
-      avaliadoEm: new Date(),
-      avaliadoPorId: superAdminId,
-    },
     select: dadosPublicosSolicitacao,
   });
+
+  if (!conta) {
+    throw new AppError(404, 'admin_account_not_found', 'Conta administrativa nao encontrada.');
+  }
+
+  if (conta.papel === 'SUPER_ADMIN') {
+    throw new AppError(
+      403,
+      'super_admin_account_protected',
+      'Contas de super administrador nao podem ser alteradas por esta rota.',
+    );
+  }
+
+  if (conta.status !== 'APROVADO') {
+    throw new AppError(
+      409,
+      'account_not_approved',
+      'Apenas contas ja aprovadas podem ser desativadas ou reativadas.',
+    );
+  }
+
+  return conta;
+}
+
+async function alterarAcessoConta(id: string, superAdminId: string, ativo: boolean) {
+  const conta = await buscarContaAprovada(id, superAdminId);
+
+  if (conta.ativo === ativo) {
+    return conta;
+  }
+
+  try {
+    return await prisma.usuarioAdmin.update({
+      where: { id, status: 'APROVADO', papel: { not: 'SUPER_ADMIN' }, ativo: !ativo },
+      data: { ativo, versaoSessao: { increment: 1 } },
+      select: dadosPublicosSolicitacao,
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      const atual = await buscarContaAprovada(id, superAdminId);
+      if (atual.ativo === ativo) {
+        return atual;
+      }
+
+      throw new AppError(
+        409,
+        'account_state_changed',
+        'O acesso da conta mudou durante a operacao. Consulte novamente e tente outra vez.',
+      );
+    }
+
+    throw error;
+  }
+}
+
+export function desativarConta(id: string, superAdminId: string) {
+  return alterarAcessoConta(id, superAdminId, false);
+}
+
+export function reativarConta(id: string, superAdminId: string) {
+  return alterarAcessoConta(id, superAdminId, true);
 }

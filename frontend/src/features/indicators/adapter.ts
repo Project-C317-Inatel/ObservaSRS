@@ -1,5 +1,6 @@
 import type { RegistroIndicador } from '../../types/api';
 import type { IndicatorMetricValue, IndicatorRecord } from '../../types/indicators';
+import { codigoVisual } from '../../shared/metricas';
 
 const METRIC_CODE_TO_SECONDARY_KEY: Record<string, string> = {
   pernoites: 'overnightStays',
@@ -37,11 +38,20 @@ export const adaptIndicatorRecords = (
       secondaryMetrics: Record<string, IndicatorMetricValue>;
     }
   >();
+  const metricasRecebidas = new Set<string>();
 
   for (const registro of registros) {
     const period = registro.periodo;
-    const sector = registro.setorNome;
+    const sector = registro.indicador.setor.nome;
+    const codigo = codigoVisual(registro.indicador.nome);
     const groupKey = `${period}__${sector}`;
+    const metricKey = `${period}__${registro.indicador.setorId}__${codigo}`;
+    if (metricasRecebidas.has(metricKey)) {
+      throw new Error(
+        'Existem valores de fontes ou indicadores diferentes para a mesma metrica, setor e periodo. Defina a fonte antes de consolidar o grafico.',
+      );
+    }
+    metricasRecebidas.add(metricKey);
 
     let record = groups.get(groupKey);
     if (!record) {
@@ -61,11 +71,10 @@ export const adaptIndicatorRecords = (
 
     const numericValue = parseNumeric(registro.valor);
 
-    if (registro.indicadorCodigo === 'visitantes') {
+    if (codigo === 'visitantes') {
       record.visitors = numericValue ?? 0;
     } else {
-      const secondaryKey =
-        METRIC_CODE_TO_SECONDARY_KEY[registro.indicadorCodigo] ?? registro.indicadorCodigo;
+      const secondaryKey = METRIC_CODE_TO_SECONDARY_KEY[codigo] ?? codigo;
       record.secondaryMetrics[secondaryKey] = numericValue;
     }
   }

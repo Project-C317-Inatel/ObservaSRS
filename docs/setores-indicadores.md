@@ -66,6 +66,10 @@ Este cadastro define o indicador e sua unidade de medida; nao registra valores p
 
 ## Consultar os cadastros
 
+Para editar os campos, ativar ou desativar setores e indicadores, use `PATCH /admin/setores/{id}`
+e `PATCH /admin/indicadores/{id}`. O corpo deve conter ao menos um campo; campos omitidos sao
+preservados. O passo a passo esta em [edicao-publicacao.md](edicao-publicacao.md).
+
 | Metodo | Rota                      | Resultado                                                                    |
 | ------ | ------------------------- | ---------------------------------------------------------------------------- |
 | GET    | `/admin/setores`          | Objeto com a lista `setores`, ordenada pelo nome.                            |

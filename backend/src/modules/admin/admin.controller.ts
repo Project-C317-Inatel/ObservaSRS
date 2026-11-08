@@ -1,8 +1,19 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../shared/errors/app-error.js';
-import { listarSolicitacoesSchema, solicitacaoIdSchema } from './admin.schemas.js';
-import { aprovarSolicitacao, listarSolicitacoes, rejeitarSolicitacao } from './admin.service.js';
+import {
+  alteracaoAcessoSchema,
+  contaIdSchema,
+  listarSolicitacoesSchema,
+  solicitacaoIdSchema,
+} from './admin.schemas.js';
+import {
+  aprovarSolicitacao,
+  desativarConta,
+  listarSolicitacoes,
+  reativarConta,
+  rejeitarSolicitacao,
+} from './admin.service.js';
 
 function obterSuperAdminId(request: Request): string {
   if (!request.auth) {
@@ -13,8 +24,8 @@ function obterSuperAdminId(request: Request): string {
 }
 
 export const listar: RequestHandler = async (request, response) => {
-  const { status } = listarSolicitacoesSchema.parse(request.query);
-  const solicitacoes = await listarSolicitacoes(status);
+  const { status, ativo } = listarSolicitacoesSchema.parse(request.query);
+  const solicitacoes = await listarSolicitacoes(status, ativo);
 
   response.status(200).json({ solicitacoes });
 };
@@ -37,4 +48,20 @@ export const rejeitar: RequestHandler = async (request, response) => {
     message: 'Conta rejeitada.',
     solicitacao,
   });
+};
+
+export const desativar: RequestHandler = async (request, response) => {
+  const { id } = contaIdSchema.parse(request.params);
+  alteracaoAcessoSchema.parse(request.body ?? {});
+  const conta = await desativarConta(id, obterSuperAdminId(request));
+
+  response.status(200).json({ message: 'Conta desativada com sucesso.', conta });
+};
+
+export const reativar: RequestHandler = async (request, response) => {
+  const { id } = contaIdSchema.parse(request.params);
+  alteracaoAcessoSchema.parse(request.body ?? {});
+  const conta = await reativarConta(id, obterSuperAdminId(request));
+
+  response.status(200).json({ message: 'Conta reativada com sucesso.', conta });
 };

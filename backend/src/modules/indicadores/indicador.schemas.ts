@@ -8,6 +8,17 @@ export const cadastroIndicadorSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
+export const edicaoIndicadorSchema = cadastroIndicadorSchema
+  .partial()
+  .extend({
+    descricao: cadastroIndicadorSchema.shape.descricao.unwrap().nullable().optional(),
+    ativo: z.boolean().optional(),
+  })
+  .strict()
+  .refine((dados) => Object.values(dados).some((valor) => valor !== undefined), {
+    message: 'Informe ao menos um campo para atualizar.',
+  });
+
 export const listarIndicadoresSchema = z.object({
   setorId: z.string().uuid().optional(),
   ativo: z
@@ -21,4 +32,5 @@ export const indicadorIdSchema = z.object({
 });
 
 export type CadastroIndicadorInput = z.infer<typeof cadastroIndicadorSchema>;
+export type EdicaoIndicadorInput = z.infer<typeof edicaoIndicadorSchema>;
 export type ListarIndicadoresInput = z.infer<typeof listarIndicadoresSchema>;

@@ -106,6 +106,9 @@ funcionando, acesse `GET http://localhost:3333/status`.
 O login grava a sessão automaticamente em um cookie `HttpOnly`. Não é necessário copiar um token
 ou preencher manualmente o botão **Authorize**.
 
+O super administrador tambem pode desativar e reativar contas ja aprovadas, com revogacao
+das sessoes anteriores. O fluxo e as protecoes estao em [docs/gestao-contas.md](docs/gestao-contas.md).
+
 Consulte [backend/README.md](backend/README.md) para ver os demais comandos.
 
 O passo a passo completo do PostgreSQL, pgAdmin, Prisma e Swagger está em
@@ -148,6 +151,45 @@ permissões administrativas dos cadastros de setores e indicadores.
 Os registros possuem valor decimal, data de referência e estado de publicação, com filtros
 por indicador, fonte, setor, intervalo de datas e publicação. Consulte os exemplos em
 [docs/fontes-registros-indicadores.md](docs/fontes-registros-indicadores.md).
+
+Os quatro cadastros tambem possuem edicao parcial por `PATCH`. Setores e indicadores podem
+ser ativados ou desativados, e registros possuem uma rota especifica para publicar ou
+despublicar. Consulte [docs/edicao-publicacao.md](docs/edicao-publicacao.md) para ver os exemplos
+e as regras de acesso. As rotas `/admin` permanecem protegidas.
+
+### Consulta Publica
+
+As rotas `/setores`, `/indicadores` e `/registros-indicadores` permitem consultar os dados
+sem login, com listagem paginada e consulta por ID. Somente registros publicados, vinculados
+a indicadores e setores ativos, ficam visiveis. Os filtros e exemplos estao em
+[docs/consulta-publica.md](docs/consulta-publica.md).
+
+### Relatorios e PDFs
+
+O backend permite cadastrar e editar relatorios, anexar PDFs de ate 10 MB e controlar
+sua publicacao. Rascunhos e seus arquivos exigem sessao administrativa; relatorios publicados
+possuem consulta e download sem login em `/relatorios`.
+
+Depois de atualizar o projeto, execute `npm ci` e `npm run db:deploy` na pasta `backend/`.
+Os arquivos ficam em armazenamento privado e persistente, por padrao em
+`backend/storage/relatorios/`, fora do Git. Consulte [docs/relatorios-pdfs.md](docs/relatorios-pdfs.md)
+para ver o fluxo no Swagger e os cuidados de backup.
+
+### Inventario PIT e Coleta dos Estabelecimentos
+
+O inventario permite cadastrar, editar, ativar, desativar e revisar itens turisticos
+em `/admin/itens-pit`, com consulta publica dos ativos em `/itens-pit`.
+Os prazos de revisao podem ser consultados pela equipe, sem notificacoes automaticas.
+Veja [docs/inventario-pit.md](docs/inventario-pit.md).
+
+O formulario de coleta envia dados mensais para `POST /api/coletas`. A equipe gerencia
+estabelecimentos em `/admin/estabelecimentos` e corrige, aprova, rejeita e publica envios
+em `/admin/coletas`. O resumo publico em `/coletas/resumo` mostra somente totais de
+coletas aprovadas e publicadas, sem dados individuais. O fluxo esta em
+[docs/estabelecimentos-coletas.md](docs/estabelecimentos-coletas.md).
+
+Na pasta `backend/`, execute `npm run db:generate` e `npm run db:deploy` antes de iniciar
+a API. Os novos endpoints e exemplos estao disponiveis no Swagger.
 
 ## Frontend
 

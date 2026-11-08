@@ -28,6 +28,7 @@ function criarUsuario(overrides: Partial<UsuarioAdmin> = {}): UsuarioAdmin {
     papel: 'ADMIN',
     status: 'APROVADO',
     ativo: true,
+    versaoSessao: 0,
     avaliadoEm: null,
     avaliadoPorId: null,
     criadoEm: new Date('2026-01-01T00:00:00Z'),
@@ -73,6 +74,18 @@ describe('Autenticacao SMCELT', () => {
     expect(sessao.status).toBe(200);
     expect(sessao.body.usuario.id).toBe(usuario.id);
     expect(database.findUnique).toHaveBeenCalledWith({ where: { id: usuario.id } });
+
+    database.findUnique.mockResolvedValue({ ...usuario, ativo: false, versaoSessao: 1 });
+    expect((await agente.get('/auth/me')).status).toBe(401);
+
+    database.findUnique.mockResolvedValue({ ...usuario, versaoSessao: 2 });
+    const sessaoAntiga = await agente.get('/auth/me');
+    expect(sessaoAntiga.status).toBe(401);
+    expect(sessaoAntiga.body.error).toBe('invalid_session');
+
+    const novoLogin = await agente.post('/auth/login').send({ email: usuario.email, senha });
+    expect(novoLogin.status).toBe(200);
+    expect((await agente.get('/auth/me')).status).toBe(200);
   });
 
   it('Senha incorreta retorna 401', async () => {
@@ -156,7 +169,7 @@ describe('Autenticacao SMCELT', () => {
       expect(resposta.status).toBe(200);
       expect(database.update).toHaveBeenCalledTimes(1);
       expect(database.update).toHaveBeenCalledWith({
-        where: { id: solicitacaoId },
+        where: { id: solicitacaoId, status: 'PENDENTE', papel: { not: 'SUPER_ADMIN' } },
         data: {
           status,
           ativo,

@@ -25,7 +25,7 @@ describe('IndicatorsPage', () => {
     const user = userEvent.setup();
     render(<IndicatorsPage />);
 
-    await screen.findByText('Pernoites');
+    await screen.findByRole('option', { name: '2026' });
     await user.selectOptions(screen.getByLabelText('Ano'), '2026');
     await user.selectOptions(screen.getByLabelText('Setor'), 'Hotelaria');
     expect(screen.getByText('Pernoites').parentElement).toHaveTextContent('2.130');

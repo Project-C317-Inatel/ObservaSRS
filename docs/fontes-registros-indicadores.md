@@ -60,7 +60,8 @@ A resposta `201` contem `message` e `registro`, incluindo indicador, setor e fon
   Prefira string para preservar a precisao. Casas decimais excedentes sao rejeitadas.
   Valores negativos sao aceitos, por exemplo para indicadores de variacao.
 - `publicado`: booleano opcional, inicialmente `false`. `true` marca o registro como publicado,
-  mas estes endpoints continuam protegidos; esta etapa nao cria consulta publica.
+  e estes endpoints em `/admin` continuam protegidos. Para consultar sem login, veja
+  [consulta-publica.md](consulta-publica.md).
 - `observacao`: texto opcional, com ate 2000 caracteres.
 
 Nas respostas, `periodo` usa `AAAA-MM-DD` e `valor` e sempre uma string com duas casas decimais.
@@ -71,6 +72,11 @@ A combinacao `indicadorId`, `fonteId` e `periodo` e unica. Repeti-la retorna `40
 Um mesmo indicador pode ter registros no mesmo periodo com fontes diferentes.
 
 ## Consultas
+
+Fontes e registros podem ser editados por `PATCH /admin/fontes-dados/{id}` e
+`PATCH /admin/registros-indicadores/{id}`. Para alterar a publicacao, use a rota separada
+`PATCH /admin/registros-indicadores/{id}/publicacao`. O tutorial e as regras estao em
+[edicao-publicacao.md](edicao-publicacao.md).
 
 | Metodo | Rota                                | Resultado                                                      |
 | ------ | ----------------------------------- | -------------------------------------------------------------- |

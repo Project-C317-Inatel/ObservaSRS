@@ -1,5 +1,12 @@
 import { api } from './api';
-import type { ListReportsResponse, ReportResponse, ReportType } from '../types';
+import type {
+  CreateReportRequest,
+  ListReportsResponse,
+  PublicReport,
+  ReportResponse,
+  ReportType,
+} from '../types';
+import { listarTodasPaginas } from './paginacao';
 
 export function resolverUrlDownload(arquivoUrl: string | null): string | null {
   if (!arquivoUrl) {
@@ -15,13 +22,22 @@ export function resolverUrlDownload(arquivoUrl: string | null): string | null {
 
 export function listarRelatorios(tipo?: ReportType): Promise<ListReportsResponse> {
   const query = tipo ? `?tipo=${encodeURIComponent(tipo)}` : '';
-  return api.get<ListReportsResponse>(`/relatorios${query}`);
+  return listarTodasPaginas<'relatorios', PublicReport>(`/relatorios${query}`, 'relatorios');
 }
 
-export function uploadRelatorio(dados: FormData): Promise<ReportResponse> {
+export function criarRelatorio(dados: CreateReportRequest): Promise<ReportResponse> {
   return api.post<ReportResponse>('/admin/relatorios', dados);
 }
 
-export function excluirRelatorio(id: string): Promise<void> {
-  return api.delete<void>(`/admin/relatorios/${id}`);
+export function uploadRelatorio(id: string, arquivo: File): Promise<ReportResponse> {
+  const dados = new FormData();
+  dados.append('arquivo', arquivo);
+  return api.post<ReportResponse>(`/admin/relatorios/${id}/arquivo`, dados);
+}
+
+export function alterarPublicacaoRelatorio(
+  id: string,
+  publicado: boolean,
+): Promise<ReportResponse> {
+  return api.patch<ReportResponse>(`/admin/relatorios/${id}/publicacao`, { publicado });
 }
