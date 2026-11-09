@@ -12,7 +12,9 @@ const numberFormat = new Intl.NumberFormat('pt-BR');
 export function KpiCard({ label, value, caption, icon, iconClass }: KpiCardProps) {
   return (
     <article className="flex h-full flex-col text-center font-body">
-      <div className={`relative flex h-24 items-center justify-center rounded-t-xl lg:h-20 ${iconClass}`}>
+      <div
+        className={`relative flex h-24 items-center justify-center rounded-t-xl lg:h-20 ${iconClass}`}
+      >
         <img src={icon} alt="" className="relative z-10 size-14 lg:size-12" />
         <span
           className={`absolute -bottom-4 left-1/2 size-8 -translate-x-1/2 rotate-45 ${iconClass}`}

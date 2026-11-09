@@ -24,7 +24,6 @@ export const HIGHLIGHT_METRICS: readonly HighlightMetric[] = [
     caption: '+3 desde 2024',
     icon: iconeHotel,
     iconClass: 'bg-brand-purple',
-    
   },
   {
     id: 'leitos',

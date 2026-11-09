@@ -11,7 +11,7 @@
   --color-data-lilac: #b986ed;
   --color-data-lilac-light: #f3b8f7;
   --color-data-yellow: #fada77;
- 
+
   --color-city-red: #e64945;
   --color-city-orange: #ffb038;
   --color-city-teal: #46a496;
@@ -30,7 +30,7 @@
   /* Fundo creme do hero */
   --color-surface-cream: #faf7f2;
 
-    /* Fontes do hero */
+  /* Fontes do hero */
   --font-hand: 'Gaegu', cursive;
   --font-display: 'Oswald', 'Arial Narrow', sans-serif;
   --font-body: 'Poppins', system-ui, sans-serif;
