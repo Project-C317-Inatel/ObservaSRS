@@ -17,12 +17,11 @@ A partir da raiz do repositorio:
 ```powershell
 cd backend
 npm ci
-npm test
+npm test -- test/auth.test.ts
 ```
 
-O comando gera o cliente Prisma e executa a bateria uma vez. O resultado aparece no terminal
-e em um relatorio HTML, incluindo falhas quando houver. Para uma execucao bem-sucedida,
-o resumo deve apresentar `Tests 5 passed (5)`.
+O comando gera o cliente Prisma e executa a bateria uma vez. Em uma execução bem-sucedida,
+o terminal mostra `Tests 5 passed (5)`.
 
 ## Cenarios
 
@@ -39,30 +38,24 @@ sao verificadas dentro do respectivo teste.
 
 ## Relatorio HTML
 
-Depois de executar `npm test`, abra no navegador:
+Os cinco cenários de login aparecem no relatório dos 41 testes. Gere o relatório com
+`npm run test:all` e abra o arquivo no navegador:
 
 ```text
-backend/reports/tests/index.html
+backend/reports/teste/index.html
 ```
 
-Se estiver na pasta `backend/`, o caminho e `reports/tests/index.html`.
-O relatorio e um arquivo independente, que pode ser compartilhado e apresenta os testes,
-seus resultados e duracoes. Uma nova execucao substitui o relatorio anterior.
-
-O diretorio `backend/reports/` esta no `.gitignore`: o relatorio e gerado localmente,
-e nao enviado junto com o codigo. Este e um relatorio de resultados dos testes, sem
-medicao de cobertura de codigo.
+Os requisitos para gerar o HTML estão no [relatório de testes do backend](testes-backend.md).
 
 ## Modo de acompanhamento
 
 Na pasta `backend/`:
 
 ```powershell
-npm run test:watch
+npm run test:watch -- test/auth.test.ts
 ```
 
 O Vitest acompanha alteracoes e reexecuta os testes, mostrando os resultados no terminal.
-Para gerar um novo relatorio HTML, encerre esse modo com `Ctrl+C` e execute `npm test`.
 
 ## Isolamento
 
