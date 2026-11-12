@@ -114,23 +114,22 @@ Consulte [backend/README.md](backend/README.md) para ver os demais comandos.
 O passo a passo completo do PostgreSQL, pgAdmin, Prisma e Swagger está em
 [docs/configuracao-postgresql.md](docs/configuracao-postgresql.md).
 
-### Testes de Login
+### Testes do backend
 
 Na pasta `backend/`, execute:
 
 ```powershell
 npm ci
-npm test
+npm run test:all
 ```
 
-A bateria utiliza Vitest e Supertest e apresenta exatamente cinco testes de login,
-sessão e permissões administrativas. O Prisma é simulado, permitindo executar os testes
-sem iniciar a API ou conectar ao PostgreSQL.
+`npm run test:all` usa um PostgreSQL local e roda os 41 testes. Para uma verificação rápida,
+`npm test` roda os 25 testes da base sem PostgreSQL e exibe os resultados no terminal.
 
-O relatório HTML é gerado em `backend/reports/tests/index.html` e pode ser aberto diretamente
-no navegador. Os arquivos gerados não são incluídos no Git.
+O relatório HTML da suíte completa é gerado em `backend/reports/teste/index.html`.
 
-Consulte [docs/testes-login.md](docs/testes-login.md) para ver os cenários e as instruções completas.
+Consulte o [relatório de testes do backend](docs/testes-backend.md) para ver os cenários,
+os requisitos de execução e os resultados da entrega.
 
 ### Setores e Indicadores
 
