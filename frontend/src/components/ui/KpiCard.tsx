@@ -3,7 +3,7 @@ export interface KpiCardProps {
   value: number;
   caption?: string;
   icon: string;
-  /** Classe Tailwind do fundo do ícone (ex.: bg-data-sky). */
+  /** Classe Tailwind da cor do topo do marcador (ex.: bg-brand-purple). */
   iconClass: string;
 }
 
@@ -11,13 +11,21 @@ const numberFormat = new Intl.NumberFormat('pt-BR');
 
 export function KpiCard({ label, value, caption, icon, iconClass }: KpiCardProps) {
   return (
-    <article className="rounded-2xl bg-white p-5 text-slate-900 shadow-lg">
-      <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${iconClass}`}>
-        <img src={icon} alt="" className="h-6 w-6" />
-      </span>
-      <p className="mt-4 text-3xl font-extrabold">{numberFormat.format(value)}</p>
-      <h3 className="mt-1 font-semibold text-slate-800">{label}</h3>
-      {caption ? <p className="mt-1 text-sm text-slate-500">{caption}</p> : null}
+    <article className="flex h-full flex-col text-center font-body">
+      <div
+        className={`relative flex h-24 items-center justify-center rounded-t-xl lg:h-20 ${iconClass}`}
+      >
+        <img src={icon} alt="" className="relative z-10 size-14 lg:size-12" />
+        <span
+          className={`absolute -bottom-4 left-1/2 size-8 -translate-x-1/2 rotate-45 ${iconClass}`}
+          aria-hidden="true"
+        />
+      </div>
+      <div className="mx-2 flex flex-1 flex-col items-center rounded-b-xl bg-white px-3 pt-7 pb-4 shadow-sm lg:pb-3">
+        <p className="text-2xl font-semibold text-text-soft">{numberFormat.format(value)}</p>
+        <h3 className="mt-1 text-sm font-medium text-text-soft">{label}</h3>
+        {caption ? <p className="mt-1 text-xs text-text-soft-muted">{caption}</p> : null}
+      </div>
     </article>
   );
 }

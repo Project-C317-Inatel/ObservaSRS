@@ -23,7 +23,7 @@ export const HIGHLIGHT_METRICS: readonly HighlightMetric[] = [
     label: 'Hospedagens',
     caption: '+3 desde 2024',
     icon: iconeHotel,
-    iconClass: 'bg-data-sky',
+    iconClass: 'bg-brand-purple',
   },
   {
     id: 'leitos',
@@ -31,7 +31,7 @@ export const HIGHLIGHT_METRICS: readonly HighlightMetric[] = [
     label: 'Leitos ocupados',
     caption: 'Média julho/2025',
     icon: iconeLeito,
-    iconClass: 'bg-brand-purple',
+    iconClass: 'bg-data-lilac',
   },
   {
     id: 'empresas',
@@ -39,7 +39,7 @@ export const HIGHLIGHT_METRICS: readonly HighlightMetric[] = [
     label: 'Empresas cadastradas',
     caption: 'Cadastur ativo',
     icon: iconeEmpresa,
-    iconClass: 'bg-data-cyan',
+    iconClass: 'bg-data-sky',
   },
   {
     id: 'empregos',
@@ -47,6 +47,6 @@ export const HIGHLIGHT_METRICS: readonly HighlightMetric[] = [
     label: 'Empregos gerados',
     caption: 'Setor turístico',
     icon: iconeEmprego,
-    iconClass: 'bg-brand-magenta',
+    iconClass: 'bg-data-yellow',
   },
 ];

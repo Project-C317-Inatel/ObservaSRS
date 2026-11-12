@@ -22,10 +22,10 @@ export interface UseHighlightMetricsResult {
 }
 
 const DEFAULT_ICONS: Record<string, { icon: string; iconClass: string }> = {
-  hospedagens: { icon: iconeHotel, iconClass: 'bg-data-sky' },
-  leitos: { icon: iconeLeito, iconClass: 'bg-brand-purple' },
-  empresas: { icon: iconeEmpresa, iconClass: 'bg-data-cyan' },
-  empregos: { icon: iconeEmprego, iconClass: 'bg-brand-magenta' },
+  hospedagens: { icon: iconeHotel, iconClass: 'bg-brand-purple' },
+  leitos: { icon: iconeLeito, iconClass: 'bg-data-lilac' },
+  empresas: { icon: iconeEmpresa, iconClass: 'bg-data-sky' },
+  empregos: { icon: iconeEmprego, iconClass: 'bg-data-yellow' },
 };
 
 function adaptApiHighlight(item: ApiHighlightMetric): HighlightMetric {

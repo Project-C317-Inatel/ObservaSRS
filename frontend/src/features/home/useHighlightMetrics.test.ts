@@ -47,7 +47,7 @@ describe('useHighlightMetrics', () => {
         value: 55,
         label: 'Hospedagens',
         caption: '+5 em 2026',
-        iconClass: 'bg-data-sky',
+        iconClass: 'bg-brand-purple',
       });
       expect(result.current.error).toBeNull();
     });
