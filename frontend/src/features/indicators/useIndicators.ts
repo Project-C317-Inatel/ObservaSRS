@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { isMockMode, shouldUseFallback } from '../../services/fallback';
 import { listarRegistrosPublicados } from '../../services/indicadores';
@@ -111,55 +111,13 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
   const useExplicitRecords = explicitRecords !== undefined;
 
   // API data state: null = not yet fetched, IndicatorRecord[] = fetched.
-  const [apiRecords, setApiRecords] = useState<readonly IndicatorRecord[] | null>(
-    useExplicitRecords ? explicitRecords : null,
+  const [apiRecords, setApiRecords] = useState<readonly IndicatorRecord[] | null>(null);
+  const [apiStatus, setApiStatus] = useState<IndicatorsStatus>(() =>
+    useExplicitRecords ? 'ready' : 'loading',
   );
-  const [status, setStatus] = useState<IndicatorsStatus>(() => {
-    if (useExplicitRecords) {
-      try {
-        const d = calculateIndicators(
-          explicitRecords,
-          getInitialFilters(options.initialFilters),
-          metricDefinitions,
-        );
-        return d.visitorFlow.length === 0 ? 'empty' : 'ready';
-      } catch {
-        return 'error';
-      }
-    }
-    // If mock mode, initialise as ready (will be set after first effect).
-    return 'loading';
-  });
+  const [apiError, setApiError] = useState<Error | null>(null);
 
-  const [derived, setDerived] = useState<DerivedIndicators>(() => {
-    if (useExplicitRecords) {
-      try {
-        return calculateIndicators(
-          explicitRecords,
-          getInitialFilters(options.initialFilters),
-          metricDefinitions,
-        );
-      } catch (cause: unknown) {
-        return {
-          ...EMPTY_DERIVED,
-          error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
-        };
-      }
-    }
-    return EMPTY_DERIVED;
-  });
-
-  const calculationId = useRef(0);
-  const filtersRef = useRef(filters);
-  // Set to true when the API fetch fails fatally (production, no fallback).
-  // Prevents the derivation effect from overwriting the error status.
-  const fetchFailed = useRef(false);
-
-  const isFirstDerivation = useRef(true);
-
-  // Step 1: fetch records from API (or use mock data) on mount when no explicit records provided.
-  // Step 2: derive indicators whenever records or filters change.
-  // Both steps are merged: fetch resolves into apiRecords; the derivation effect runs on apiRecords.
+  // Fetch records from API (or use mock data) on mount when no explicit records provided.
   useEffect(() => {
     if (useExplicitRecords) return;
 
@@ -184,18 +142,12 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
       .then((records) => {
         if (cancelled) return;
         setApiRecords(records);
+        setApiStatus('ready');
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        fetchFailed.current = true;
-        setDerived({
-          ...EMPTY_DERIVED,
-          error: err instanceof Error ? err : new Error('Falha ao buscar os indicadores.'),
-        });
-        setStatus('error');
-        // Trigger the derivation effect guard by setting an empty array,
-        // but fetchFailed.current will prevent it from overwriting the error.
-        setApiRecords([]);
+        setApiError(err instanceof Error ? err : new Error('Falha ao buscar os indicadores.'));
+        setApiStatus('error');
       });
 
     return () => {
@@ -203,54 +155,50 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
     };
   }, [useExplicitRecords]);
 
-  // Derive indicators whenever records or filters change.
-  useEffect(() => {
-    const activeRecords = useExplicitRecords ? (explicitRecords ?? []) : (apiRecords ?? []);
-    const recordsReady = useExplicitRecords || apiRecords !== null;
-
-    if (!recordsReady) return;
-
-    // If the fetch failed fatally, do not overwrite the error status with derivation.
-    if (fetchFailed.current) return;
-
-    // Skip setting loading on the very first derivation (initial render already set status).
-    const isFirst = isFirstDerivation.current;
-    isFirstDerivation.current = false;
-
-    if (!isFirst) {
-      setStatus('loading');
+  // Compute derived indicators synchronously with useMemo.
+  const derived = useMemo<DerivedIndicators>(() => {
+    if (!useExplicitRecords && apiStatus !== 'ready') {
+      return EMPTY_DERIVED;
     }
+    const activeRecords = useExplicitRecords ? (explicitRecords ?? []) : (apiRecords ?? []);
+    try {
+      return calculateIndicators(activeRecords, filters, metricDefinitions);
+    } catch (cause: unknown) {
+      return {
+        ...EMPTY_DERIVED,
+        error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
+      };
+    }
+  }, [apiRecords, apiStatus, explicitRecords, filters, metricDefinitions, useExplicitRecords]);
 
-    const currentCalculation = ++calculationId.current;
+  // Derive status synchronously:
+  // - If using explicit records: 'empty' when visitorFlow is empty, else 'ready'.
+  // - If fetching from API: reflects apiStatus ('loading' or 'error'); once ready, 'empty' when visitorFlow is empty.
+  const status: IndicatorsStatus = useMemo(() => {
+    if (useExplicitRecords) {
+      if (derived.error) return 'error';
+      return derived.visitorFlow.length === 0 ? 'empty' : 'ready';
+    }
+    if (apiStatus === 'loading') return 'loading';
+    if (apiStatus === 'error') return 'error';
+    if (derived.error) return 'error';
+    return derived.visitorFlow.length === 0 ? 'empty' : 'ready';
+  }, [useExplicitRecords, derived.error, derived.visitorFlow.length, apiStatus]);
 
-    queueMicrotask(() => {
-      if (currentCalculation !== calculationId.current) return;
-
-      try {
-        const nextDerived = calculateIndicators(activeRecords, filters, metricDefinitions);
-        setDerived(nextDerived);
-        setStatus(nextDerived.visitorFlow.length === 0 ? 'empty' : 'ready');
-      } catch (cause: unknown) {
-        setDerived({
-          ...EMPTY_DERIVED,
-          error: cause instanceof Error ? cause : new Error('Falha ao calcular os indicadores.'),
-        });
-        setStatus('error');
-      }
-    });
-  }, [apiRecords, explicitRecords, filters, metricDefinitions, useExplicitRecords]);
+  const error = useExplicitRecords ? derived.error : (apiError ?? derived.error);
 
   const updateFilters = useCallback((changes: Partial<IndicatorFilters>) => {
-    const nextFilters = { ...filtersRef.current, ...changes };
-    if (
-      nextFilters.year === filtersRef.current.year &&
-      nextFilters.period === filtersRef.current.period &&
-      nextFilters.sector === filtersRef.current.sector
-    ) {
-      return;
-    }
-    filtersRef.current = nextFilters;
-    setFiltersState(nextFilters);
+    setFiltersState((prev) => {
+      const nextFilters = { ...prev, ...changes };
+      if (
+        nextFilters.year === prev.year &&
+        nextFilters.period === prev.period &&
+        nextFilters.sector === prev.sector
+      ) {
+        return prev;
+      }
+      return nextFilters;
+    });
   }, []);
 
   const setFilter = useCallback(
@@ -287,7 +235,7 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
     status,
     isLoading: status === 'loading',
     isEmpty: status === 'empty',
-    error: derived.error,
+    error,
   };
 
   return {
