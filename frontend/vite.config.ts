@@ -12,5 +12,15 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     pool: 'threads',
     maxWorkers: 1,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/types/**', 'src/main.tsx'],
+      reporter: ['text', 'html'],
+      thresholds: {
+        lines: 80,
+        branches: 70,
+      },
+    },
   },
 });
