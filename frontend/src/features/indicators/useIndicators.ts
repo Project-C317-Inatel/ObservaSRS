@@ -51,12 +51,7 @@ export interface IndicatorsActions {
   setChartType(chartType: ChartType): void;
 }
 
-export interface UseIndicatorsResult extends IndicatorsViewState, IndicatorsActions {
-  /** Alias useful when passing the complete derived state to a view. */
-  view: IndicatorsViewState;
-  /** View-model name used by consumers that keep state separate from actions. */
-  viewModel: IndicatorsViewState;
-}
+export type UseIndicatorsResult = IndicatorsViewState & IndicatorsActions;
 
 const EMPTY_FILTERS: IndicatorFilters = {
   year: null,
@@ -244,7 +239,5 @@ export function useIndicators(options: UseIndicatorsOptions = {}): UseIndicators
     setFilters,
     resetFilters,
     setChartType,
-    view,
-    viewModel: view,
   };
 }
