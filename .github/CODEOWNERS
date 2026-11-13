@@ -1,0 +1,11 @@
+# Responsáveis pelo backend
+/backend/ @Breno-N4scimento @armengol2
+
+# Responsáveis pelo frontend
+/frontend/ @LucasDavid80 @Lilyan-Oliveira
+
+# Os testes E2E integram frontend e backend
+/e2e/ @Breno-N4scimento @armengol2 @LucasDavid80 @Lilyan-Oliveira
+
+# Todos os integrantes revisam alterações no pipeline
+/.github/workflows/ @Breno-N4scimento @armengol2 @LucasDavid80 @Lilyan-Oliveira
