@@ -1,6 +1,10 @@
 import type { FormEvent } from 'react';
 
-import { useColetaAutonomaForm, formatarCnpj } from '../../hooks/useColetaAutonomaForm';
+import {
+  useColetaAutonomaForm,
+  formatarCnpj,
+  obterMesAtualIso,
+} from '../../hooks/useColetaAutonomaForm';
 import { Button } from '../ui/Button';
 
 export interface ColetaAutonomaFormProps {
@@ -90,6 +94,7 @@ export function ColetaAutonomaForm({
             id="periodoReferencia"
             name="periodoReferencia"
             type="month"
+            max={obterMesAtualIso()}
             value={values.periodoReferencia}
             onChange={(event) => updateField('periodoReferencia', event.target.value)}
             aria-describedby={errors.periodoReferencia ? 'periodoReferencia-error' : undefined}
@@ -115,10 +120,10 @@ export function ColetaAutonomaForm({
             type="number"
             min={0}
             step={1}
-            value={values.leitosOcupados === 0 ? '' : values.leitosOcupados}
+            value={values.leitosOcupados === null ? '' : values.leitosOcupados}
             onChange={(event) => {
               const val = event.target.value;
-              updateField('leitosOcupados', val === '' ? 0 : parseInt(val, 10));
+              updateField('leitosOcupados', val === '' ? null : parseInt(val, 10));
             }}
             aria-describedby={errors.leitosOcupados ? 'leitosOcupados-error' : undefined}
             aria-invalid={Boolean(errors.leitosOcupados)}

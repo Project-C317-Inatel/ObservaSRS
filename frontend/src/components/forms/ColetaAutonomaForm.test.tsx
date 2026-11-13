@@ -46,6 +46,9 @@ describe('ColetaAutonomaForm', () => {
       screen.getByText('Informe um CNPJ válido no formato 00.000.000/0001-00.'),
     ).toBeInTheDocument();
     expect(screen.getByText('Selecione o período de referência.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Informe o número de leitos ocupados (valor ≥ 0).'),
+    ).toBeInTheDocument();
   });
 
   it('deve aplicar máscara no CNPJ progressivamente ao digitar', async () => {
@@ -167,6 +170,9 @@ describe('ColetaAutonomaForm', () => {
     fireEvent.change(screen.getByLabelText(/período de referência/i), {
       target: { value: '2026-10' },
     });
+    const leitosInput = screen.getByLabelText(/nº de leitos ocupados/i);
+    await user.clear(leitosInput);
+    await user.type(leitosInput, '15');
 
     await user.click(screen.getByRole('button', { name: /enviar/i }));
 
