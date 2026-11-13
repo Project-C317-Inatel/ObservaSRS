@@ -12,6 +12,9 @@ export interface ColetaAutonomaFormValues {
   origemVisitantes: string;
 }
 
+const IDENTIFICADOR_MIN_LENGTH = 3;
+const IDENTIFICADOR_MAX_LENGTH = 30;
+
 const initialValues: ColetaAutonomaFormValues = {
   nomeEstabelecimento: '',
   cnpjCadastur: '',
@@ -20,47 +23,72 @@ const initialValues: ColetaAutonomaFormValues = {
   origemVisitantes: '',
 };
 
+function normalizarIdentificador(value: string): string {
+  return value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+}
+
 export function formatarCnpj(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 14);
+  const identifier = normalizarIdentificador(value).slice(0, IDENTIFICADOR_MAX_LENGTH);
+  const isNumericCnpj = /^\d+$/.test(identifier);
+  const isCompleteAlphanumericCnpj =
+    identifier.length === 14 && /^\d{2}$/.test(identifier.slice(12));
 
-  if (digits.length <= 2) {
-    return digits;
-  }
-  if (digits.length <= 5) {
-    return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-  }
-  if (digits.length <= 8) {
-    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
-  }
-  if (digits.length <= 12) {
-    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
+  if (!isNumericCnpj && !isCompleteAlphanumericCnpj) {
+    return identifier;
   }
 
-  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+  if (identifier.length <= 2) {
+    return identifier;
+  }
+  if (identifier.length <= 5) {
+    return `${identifier.slice(0, 2)}.${identifier.slice(2)}`;
+  }
+  if (identifier.length <= 8) {
+    return `${identifier.slice(0, 2)}.${identifier.slice(2, 5)}.${identifier.slice(5)}`;
+  }
+  if (identifier.length <= 12) {
+    return `${identifier.slice(0, 2)}.${identifier.slice(2, 5)}.${identifier.slice(5, 8)}/${identifier.slice(8)}`;
+  }
+
+  return `${identifier.slice(0, 2)}.${identifier.slice(2, 5)}.${identifier.slice(5, 8)}/${identifier.slice(8, 12)}-${identifier.slice(12, 14)}`;
 }
 
 export function validarCnpj(cnpj: string): boolean {
-  const digits = cnpj.replace(/\D/g, '');
-  if (digits.length !== 14) return false;
-  if (/^(\d)\1{13}$/.test(digits)) return false;
+  const identifier = normalizarIdentificador(cnpj);
+  if (identifier.length !== 14 || !/^[A-Z0-9]{14}$/.test(identifier)) return false;
+  if (!/^\d{2}$/.test(identifier.slice(12))) return false;
+  if (/^([A-Z0-9])\1{13}$/.test(identifier)) return false;
 
   const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   let sum1 = 0;
   for (let i = 0; i < 12; i++) {
-    sum1 += Number(digits[i]) * (weights1[i] ?? 0);
+    sum1 += (identifier.charCodeAt(i) - 48) * (weights1[i] ?? 0);
   }
   const rest1 = sum1 % 11;
   const dv1 = rest1 < 2 ? 0 : 11 - rest1;
-  if (Number(digits[12]) !== dv1) return false;
+  if (Number(identifier[12]) !== dv1) return false;
 
   const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   let sum2 = 0;
   for (let i = 0; i < 13; i++) {
-    sum2 += Number(digits[i]) * (weights2[i] ?? 0);
+    sum2 += (identifier.charCodeAt(i) - 48) * (weights2[i] ?? 0);
   }
   const rest2 = sum2 % 11;
   const dv2 = rest2 < 2 ? 0 : 11 - rest2;
-  return Number(digits[13]) === dv2;
+  return Number(identifier[13]) === dv2;
+}
+
+export function validarCnpjOuCadastur(value: string): boolean {
+  const identifier = normalizarIdentificador(value);
+  if (
+    identifier.length < IDENTIFICADOR_MIN_LENGTH ||
+    identifier.length > IDENTIFICADOR_MAX_LENGTH
+  ) {
+    return false;
+  }
+
+  const isCnpjCandidate = identifier.length === 14 && /^\d{2}$/.test(identifier.slice(12));
+  return !isCnpjCandidate || validarCnpj(identifier);
 }
 
 export function obterMesAtualIso(): string {
@@ -77,9 +105,8 @@ function validate(values: ColetaAutonomaFormValues): ColetaAutonomaErrors {
     errors.nomeEstabelecimento = 'Informe o nome do estabelecimento (mínimo 3 caracteres).';
   }
 
-  const cnpjNumeros = values.cnpjCadastur.replace(/\D/g, '');
-  if (cnpjNumeros.length !== 14 || !validarCnpj(cnpjNumeros)) {
-    errors.cnpjCadastur = 'Informe um CNPJ válido no formato 00.000.000/0001-00.';
+  if (!validarCnpjOuCadastur(values.cnpjCadastur)) {
+    errors.cnpjCadastur = 'Informe um CNPJ ou Cadastur válido.';
   }
 
   if (!values.periodoReferencia || !/^\d{4}-(0[1-9]|1[0-2])$/.test(values.periodoReferencia)) {
@@ -95,10 +122,6 @@ function validate(values: ColetaAutonomaFormValues): ColetaAutonomaErrors {
     values.leitosOcupados < 0
   ) {
     errors.leitosOcupados = 'Informe o número de leitos ocupados (valor ≥ 0).';
-  }
-
-  if (values.origemVisitantes.length > 120) {
-    errors.origemVisitantes = 'A origem dos visitantes deve ter no máximo 120 caracteres.';
   }
 
   return errors;
@@ -135,7 +158,7 @@ export function useColetaAutonomaForm() {
     try {
       const payload: ColetaAutonomaRequest = {
         nomeEstabelecimento: values.nomeEstabelecimento.trim(),
-        cnpjCadastur: values.cnpjCadastur,
+        cnpjCadastur: normalizarIdentificador(values.cnpjCadastur),
         periodoReferencia: values.periodoReferencia,
         leitosOcupados: values.leitosOcupados as number,
         origemVisitantes: values.origemVisitantes.trim(),
