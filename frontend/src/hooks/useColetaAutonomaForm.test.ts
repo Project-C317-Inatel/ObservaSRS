@@ -47,7 +47,7 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
     expect(result.current.errors).toEqual({});
@@ -90,6 +90,9 @@ describe('useColetaAutonomaForm', () => {
       'Informe um CNPJ válido no formato 00.000.000/0001-00.',
     );
     expect(result.current.errors.periodoReferencia).toBe('Selecione o período de referência.');
+    expect(result.current.errors.leitosOcupados).toBe(
+      'Informe o número de leitos ocupados (valor ≥ 0).',
+    );
     expect(enviarColeta).not.toHaveBeenCalled();
   });
 
@@ -176,7 +179,7 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
   });
@@ -221,11 +224,109 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
     expect(result.current.errors).toEqual({});
     expect(result.current.status).toBe('idle');
     expect(result.current.feedback).toBeNull();
+  });
+
+  it('deve rejeitar CNPJ com dígitos verificadores inválidos', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-90'); // dígito correto seria 95
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.cnpjCadastur).toBe(
+      'Informe um CNPJ válido no formato 00.000.000/0001-00.',
+    );
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve rejeitar CNPJ com todos os dígitos repetidos', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '00.000.000/0000-00');
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.cnpjCadastur).toBe(
+      'Informe um CNPJ válido no formato 00.000.000/0001-00.',
+    );
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve rejeitar período de referência futuro', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-95');
+      result.current.updateField('periodoReferencia', '2099-12');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.periodoReferencia).toBe(
+      'O período de referência não pode ser futuro.',
+    );
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve aceitar 0 leitos ocupados como valor preenchido válido', async () => {
+    const mockResponse: ColetaAutonomaResponse = {
+      message: 'Coleta enviada com sucesso para validação da SMCELT.',
+      coleta: {
+        id: 'coleta-zero',
+        nomeEstabelecimento: 'Pousada Fechada',
+        cnpjCadastur: '12.345.678/0001-95',
+        periodoReferencia: '2026-10',
+        leitosOcupados: 0,
+        origemVisitantes: '',
+      },
+    };
+
+    vi.mocked(enviarColeta).mockResolvedValueOnce(mockResponse);
+
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Pousada Fechada');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-95');
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 0);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(enviarColeta).toHaveBeenCalledWith({
+      nomeEstabelecimento: 'Pousada Fechada',
+      cnpjCadastur: '12.345.678/0001-95',
+      periodoReferencia: '2026-10',
+      leitosOcupados: 0,
+      origemVisitantes: '',
+    });
+    expect(result.current.status).toBe('success');
   });
 });
