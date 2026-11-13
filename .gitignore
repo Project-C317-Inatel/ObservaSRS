@@ -8,6 +8,8 @@ backend/reports/
 backend/.vitest/
 backend/src/generated/prisma/
 backend/storage/
+playwright-report/
+test-results/
 
 # Environment variables
 .env
