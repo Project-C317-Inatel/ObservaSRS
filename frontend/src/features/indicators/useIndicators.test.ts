@@ -66,7 +66,7 @@ describe('useIndicators — registros explícitos (comportamento legado)', () =>
     expect(result.current.error).toBeNull();
   });
 
-  it('mantém filtros globais e deriva novamente fluxo e cards', async () => {
+  it('mantém filtros globais e deriva novamente fluxo e cards de forma imediata', () => {
     const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
@@ -74,9 +74,7 @@ describe('useIndicators — registros explícitos (comportamento legado)', () =>
       result.current.setChartType('line');
     });
 
-    expect(result.current.status).toBe('loading');
-    await waitFor(() => expect(result.current.status).toBe('ready'));
-
+    expect(result.current.status).toBe('ready');
     expect(result.current.filters).toEqual({
       year: 2026,
       period: null,
@@ -90,19 +88,19 @@ describe('useIndicators — registros explícitos (comportamento legado)', () =>
     expect(result.current.secondaryCards[0]?.value).toBe(2130);
   });
 
-  it('permite alterar um filtro e resetar todos os filtros', async () => {
+  it('permite alterar um filtro e resetar todos os filtros de forma síncrona', () => {
     const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
       result.current.setFilter('period', '2025-01');
     });
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.status).toBe('ready');
     expect(result.current.filters.period).toBe('2025-01');
 
     act(() => {
       result.current.resetFilters();
     });
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.status).toBe('ready');
     expect(result.current.filters).toEqual({
       year: null,
       period: null,
@@ -110,21 +108,31 @@ describe('useIndicators — registros explícitos (comportamento legado)', () =>
     });
   });
 
-  it('expõe loading antes de publicar a nova derivação dos filtros', async () => {
+  it('atualiza imediatamente para empty sem exibir loading ao filtrar', () => {
     const { result } = renderHook(() => useIndicators({ records: INDICATOR_DATA }));
 
     act(() => {
       result.current.setFilter('year', 2030);
     });
 
-    expect(result.current.status).toBe('loading');
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.visitorFlow).toEqual([]);
-    expect(result.current.secondaryCards).toEqual([]);
-
-    await waitFor(() => expect(result.current.status).toBe('empty'));
+    expect(result.current.status).toBe('empty');
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isEmpty).toBe(true);
+    expect(result.current.visitorFlow).toEqual([]);
+    expect(result.current.secondaryCards.every((card) => card.value === null)).toBe(true);
+  });
+
+  it('não entra em loop com lista nova a cada render', async () => {
+    let renders = 0;
+    const { rerender } = renderHook(() => {
+      renders++;
+      return useIndicators({ records: [...INDICATOR_DATA] });
+    });
+
+    rerender();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(renders).toBeLessThan(10);
   });
 
   it('explicita o estado vazio sem consultar backend', () => {

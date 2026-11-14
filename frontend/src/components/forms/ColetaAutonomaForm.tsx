@@ -74,8 +74,8 @@ export function ColetaAutonomaForm({
             aria-describedby={errors.cnpjCadastur ? 'cnpjCadastur-error' : undefined}
             aria-invalid={Boolean(errors.cnpjCadastur)}
             disabled={isLoading}
-            placeholder="00.000.000/0001-00"
-            maxLength={18}
+            placeholder="CNPJ ou Cadastur"
+            maxLength={30}
           />
           {errors.cnpjCadastur ? (
             <p className="mt-1 text-sm text-red-600" id="cnpjCadastur-error">
