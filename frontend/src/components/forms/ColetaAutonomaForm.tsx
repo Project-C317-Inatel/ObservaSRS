@@ -1,6 +1,10 @@
 import type { FormEvent } from 'react';
 
-import { useColetaAutonomaForm, formatarCnpj } from '../../hooks/useColetaAutonomaForm';
+import {
+  useColetaAutonomaForm,
+  formatarCnpj,
+  obterMesAtualIso,
+} from '../../hooks/useColetaAutonomaForm';
 import { Button } from '../ui/Button';
 
 export interface ColetaAutonomaFormProps {
@@ -70,8 +74,8 @@ export function ColetaAutonomaForm({
             aria-describedby={errors.cnpjCadastur ? 'cnpjCadastur-error' : undefined}
             aria-invalid={Boolean(errors.cnpjCadastur)}
             disabled={isLoading}
-            placeholder="00.000.000/0001-00"
-            maxLength={18}
+            placeholder="CNPJ ou Cadastur"
+            maxLength={30}
           />
           {errors.cnpjCadastur ? (
             <p className="mt-1 text-sm text-red-600" id="cnpjCadastur-error">
@@ -90,6 +94,7 @@ export function ColetaAutonomaForm({
             id="periodoReferencia"
             name="periodoReferencia"
             type="month"
+            max={obterMesAtualIso()}
             value={values.periodoReferencia}
             onChange={(event) => updateField('periodoReferencia', event.target.value)}
             aria-describedby={errors.periodoReferencia ? 'periodoReferencia-error' : undefined}
@@ -115,10 +120,10 @@ export function ColetaAutonomaForm({
             type="number"
             min={0}
             step={1}
-            value={values.leitosOcupados === 0 ? '' : values.leitosOcupados}
+            value={values.leitosOcupados === null ? '' : values.leitosOcupados}
             onChange={(event) => {
               const val = event.target.value;
-              updateField('leitosOcupados', val === '' ? 0 : parseInt(val, 10));
+              updateField('leitosOcupados', val === '' ? null : parseInt(val, 10));
             }}
             aria-describedby={errors.leitosOcupados ? 'leitosOcupados-error' : undefined}
             aria-invalid={Boolean(errors.leitosOcupados)}

@@ -1,6 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useColetaAutonomaForm, formatarCnpj } from './useColetaAutonomaForm';
+import {
+  formatarCnpj,
+  useColetaAutonomaForm,
+  validarCnpj,
+  validarCnpjOuCadastur,
+} from './useColetaAutonomaForm';
 import { enviarColeta } from '../services/coleta';
 import type { ColetaAutonomaResponse } from '../types';
 
@@ -13,8 +18,8 @@ describe('formatarCnpj', () => {
     expect(formatarCnpj('')).toBe('');
   });
 
-  it('deve remover caracteres não numéricos', () => {
-    expect(formatarCnpj('12.abc345')).toBe('12.345');
+  it('deve normalizar identificadores alfanuméricos', () => {
+    expect(formatarCnpj('cadastur-abc12x')).toBe('CADASTURABC12X');
   });
 
   it('deve formatar CNPJ parcial progressivamente', () => {
@@ -33,6 +38,31 @@ describe('formatarCnpj', () => {
   it('deve truncar se exceder 14 dígitos', () => {
     expect(formatarCnpj('12345678000195999')).toBe('12.345.678/0001-95');
   });
+
+  it('deve aplicar máscara em CNPJ alfanumérico completo', () => {
+    expect(formatarCnpj('AB.CDE.FGH/0001-95')).toBe('AB.CDE.FGH/0001-95');
+  });
+});
+
+describe('validarCnpj', () => {
+  it('deve validar CNPJ alfanumérico com dígitos verificadores', () => {
+    expect(validarCnpj('AB.CDE.FGH/IJKL-80')).toBe(true);
+  });
+
+  it('deve rejeitar CNPJ alfanumérico com dígitos verificadores inválidos', () => {
+    expect(validarCnpj('AB.CDE.FGH/IJKL-81')).toBe(false);
+  });
+});
+
+describe('validarCnpjOuCadastur', () => {
+  it('deve aceitar Cadastur alfanumérico', () => {
+    expect(validarCnpjOuCadastur('CADASTURABC12X')).toBe(true);
+  });
+
+  it('deve rejeitar identificadores fora do limite do backend', () => {
+    expect(validarCnpjOuCadastur('AB')).toBe(false);
+    expect(validarCnpjOuCadastur('A'.repeat(31))).toBe(false);
+  });
 });
 
 describe('useColetaAutonomaForm', () => {
@@ -47,7 +77,7 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
     expect(result.current.errors).toEqual({});
@@ -86,19 +116,20 @@ describe('useColetaAutonomaForm', () => {
     expect(result.current.errors.nomeEstabelecimento).toBe(
       'Informe o nome do estabelecimento (mínimo 3 caracteres).',
     );
-    expect(result.current.errors.cnpjCadastur).toBe(
-      'Informe um CNPJ válido no formato 00.000.000/0001-00.',
-    );
+    expect(result.current.errors.cnpjCadastur).toBe('Informe um CNPJ ou Cadastur válido.');
     expect(result.current.errors.periodoReferencia).toBe('Selecione o período de referência.');
+    expect(result.current.errors.leitosOcupados).toBe(
+      'Informe o número de leitos ocupados (valor ≥ 0).',
+    );
     expect(enviarColeta).not.toHaveBeenCalled();
   });
 
-  it('deve validar CNPJ com menos de 14 dígitos', async () => {
+  it('deve rejeitar identificador com menos de 3 caracteres', async () => {
     const { result } = renderHook(() => useColetaAutonomaForm());
 
     act(() => {
       result.current.updateField('nomeEstabelecimento', 'Hotel Bela Vista');
-      result.current.updateField('cnpjCadastur', '12.345.678');
+      result.current.updateField('cnpjCadastur', 'AB');
       result.current.updateField('periodoReferencia', '2026-10');
       result.current.updateField('leitosOcupados', 15);
     });
@@ -107,9 +138,7 @@ describe('useColetaAutonomaForm', () => {
       await result.current.submit();
     });
 
-    expect(result.current.errors.cnpjCadastur).toBe(
-      'Informe um CNPJ válido no formato 00.000.000/0001-00.',
-    );
+    expect(result.current.errors.cnpjCadastur).toBe('Informe um CNPJ ou Cadastur válido.');
     expect(enviarColeta).not.toHaveBeenCalled();
   });
 
@@ -164,7 +193,7 @@ describe('useColetaAutonomaForm', () => {
 
     expect(enviarColeta).toHaveBeenCalledWith({
       nomeEstabelecimento: 'Pousada Encanto',
-      cnpjCadastur: '12.345.678/0001-95',
+      cnpjCadastur: '12345678000195',
       periodoReferencia: '2026-10',
       leitosOcupados: 20,
       origemVisitantes: 'sudeste',
@@ -176,7 +205,7 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
   });
@@ -221,11 +250,105 @@ describe('useColetaAutonomaForm', () => {
       nomeEstabelecimento: '',
       cnpjCadastur: '',
       periodoReferencia: '',
-      leitosOcupados: 0,
+      leitosOcupados: null,
       origemVisitantes: '',
     });
     expect(result.current.errors).toEqual({});
     expect(result.current.status).toBe('idle');
     expect(result.current.feedback).toBeNull();
+  });
+
+  it('deve rejeitar CNPJ com dígitos verificadores inválidos', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-90'); // dígito correto seria 95
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.cnpjCadastur).toBe('Informe um CNPJ ou Cadastur válido.');
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve rejeitar CNPJ com todos os dígitos repetidos', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '00.000.000/0000-00');
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.cnpjCadastur).toBe('Informe um CNPJ ou Cadastur válido.');
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve rejeitar período de referência futuro', async () => {
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Hotel Imperial');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-95');
+      result.current.updateField('periodoReferencia', '2099-12');
+      result.current.updateField('leitosOcupados', 10);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(result.current.errors.periodoReferencia).toBe(
+      'O período de referência não pode ser futuro.',
+    );
+    expect(enviarColeta).not.toHaveBeenCalled();
+  });
+
+  it('deve aceitar 0 leitos ocupados como valor preenchido válido', async () => {
+    const mockResponse: ColetaAutonomaResponse = {
+      message: 'Coleta enviada com sucesso para validação da SMCELT.',
+      coleta: {
+        id: 'coleta-zero',
+        nomeEstabelecimento: 'Pousada Fechada',
+        cnpjCadastur: '12.345.678/0001-95',
+        periodoReferencia: '2026-10',
+        leitosOcupados: 0,
+        origemVisitantes: '',
+      },
+    };
+
+    vi.mocked(enviarColeta).mockResolvedValueOnce(mockResponse);
+
+    const { result } = renderHook(() => useColetaAutonomaForm());
+
+    act(() => {
+      result.current.updateField('nomeEstabelecimento', 'Pousada Fechada');
+      result.current.updateField('cnpjCadastur', '12.345.678/0001-95');
+      result.current.updateField('periodoReferencia', '2026-10');
+      result.current.updateField('leitosOcupados', 0);
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(enviarColeta).toHaveBeenCalledWith({
+      nomeEstabelecimento: 'Pousada Fechada',
+      cnpjCadastur: '12345678000195',
+      periodoReferencia: '2026-10',
+      leitosOcupados: 0,
+      origemVisitantes: '',
+    });
+    expect(result.current.status).toBe('success');
   });
 });

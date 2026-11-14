@@ -18,6 +18,7 @@ npm run preview      # serve o build gerado
 npm run typecheck    # verifica os tipos TypeScript
 npm run lint         # verifica a qualidade do código
 npm run format:check # verifica a formatação
+npm test             # executa os testes automatizados com Vitest
 ```
 
 ## Estrutura
