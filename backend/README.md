@@ -21,7 +21,8 @@ npm start            # executa o build gerado
 npm run typecheck    # verifica os tipos TypeScript
 npm run lint         # verifica a qualidade do codigo
 npm run format:check # verifica a formatacao
-npm test             # executa os testes e gera relatorio HTML
+npm test             # executa os 25 testes da base sem PostgreSQL
+npm run test:all     # executa as tres camadas com PostgreSQL local
 npm run test:watch   # reexecuta os testes ao alterar arquivos
 npm run db:setup     # aplica migrations e cria o super administrador inicial
 npm run db:migrate   # cria/aplica migrations durante o desenvolvimento
@@ -29,36 +30,13 @@ npm run db:deploy    # aplica migrations existentes sem executar o seed
 npm run db:studio    # abre a interface visual do Prisma
 ```
 
-## Testes de autenticacao
+## Testes automatizados
 
-Requer Node.js 22.12 ou superior. Na pasta `backend/`, instale as dependencias com
-`npm ci` e execute:
+`npm test` exibe os resultados da suíte rápida no terminal. A suíte completa usa um
+PostgreSQL local com permissão `CREATEDB` e gera `reports/teste/index.html`.
 
-```powershell
-npm test
-```
-
-Vitest executa os testes e Supertest envia as requisicoes para a aplicacao Express.
-Os cinco cenarios cobertos sao:
-
-1. Login valido cria um cookie `HttpOnly` e permite consultar a sessao.
-2. Senha incorreta retorna `401`, sem criar sessao.
-3. Contas pendentes e rejeitadas recebem `403`, mesmo com senha correta.
-4. Somente `SUPER_ADMIN` pode aprovar ou rejeitar contas; `ADMIN` e `EDITOR` recebem `403`.
-5. Uma rota protegida recebe `401` quando nao existe login.
-
-O relatorio apresenta exatamente cinco testes, um por cenario. As variacoes de status
-e permissoes sao verificadas dentro do respectivo teste.
-As consultas e atualizacoes do Prisma sao simuladas. Senhas, JWT, cookies, controllers e
-middlewares utilizam o codigo real da aplicacao. Essa bateria nao verifica a persistencia
-no PostgreSQL e nao exige banco, `.env` configurado ou servidor em execucao.
-
-Ao terminar, abra `reports/tests/index.html` no navegador. O arquivo e independente e
-mostra os casos aprovados, falhas e duracoes; pode ser compartilhado como relatorio da execucao.
-Os resultados gerados ficam fora do Git. Para acompanhar alteracoes, use `npm run test:watch`.
-
-O passo a passo e os resultados esperados de cada cenario estao em
-[docs/testes-login.md](../docs/testes-login.md).
+As instruções e os resultados da entrega estão no [relatório de testes do backend](../docs/testes-backend.md).
+Os cinco cenários iniciais de autenticação estão detalhados em [Testes de login](../docs/testes-login.md).
 
 ## Endpoint inicial
 
