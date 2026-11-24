@@ -5,6 +5,7 @@ export interface NavItem {
 
 /** Links públicos do cabeçalho */
 export const PUBLIC_NAV: readonly NavItem[] = [
+  { path: '/cidade', label: 'Conheça a cidade' },
   { path: '/indicadores', label: 'Indicadores' },
   { path: '/relatorios', label: 'Relatórios' },
   { path: '/inventario', label: 'Inventário PIT' },

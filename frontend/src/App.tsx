@@ -9,6 +9,7 @@ import { AdminPlaceholderPage } from './features/admin/AdminPlaceholderPage';
 import { ColetaPage } from './pages/ColetaPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { CityPage } from './features/city/CityPage';
 
 function AdminHomeRoute() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function App() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="cidade" element={<CityPage />} />
         <Route path="indicadores" element={<HomePage />} />
         <Route path="relatorios" element={<HomePage />} />
         <Route path="inventario" element={<PitPage />} />
