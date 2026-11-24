@@ -1,33 +1,15 @@
-import { Navigate, Route, Routes, useNavigate } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
 
+import { AdminLayout } from './components/layout/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { CadasturPage } from './features/cadastur/CadasturPage';
 import { PitPage } from './features/pit/PitPage';
-import { AdminPage } from './features/admin/AdminPage';
-import { AdminPlaceholderPage } from './features/admin/AdminPlaceholderPage';
+import { AccessRequestsPage } from './features/admin/AccessRequestsPage';
+import { AdminHomePage } from './features/admin/AdminHomePage';
 import { ColetaPage } from './pages/ColetaPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
-
-function AdminHomeRoute() {
-  const navigate = useNavigate();
-
-  return (
-    <AdminPlaceholderPage
-      onLogout={() => navigate('/login')}
-      onUnauthenticated={() => navigate('/login')}
-    />
-  );
-}
-
-function AccessRequestsRoute() {
-  const navigate = useNavigate();
-
-  return (
-    <AdminPage onLogout={() => navigate('/login')} onUnauthenticated={() => navigate('/login')} />
-  );
-}
 
 export default function App() {
   return (
@@ -43,11 +25,12 @@ export default function App() {
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
-        <Route path="admin" element={<AdminHomeRoute />} />
-      </Route>
-
-      <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-        <Route path="admin/solicitacoes" element={<AccessRequestsRoute />} />
+        <Route path="admin" element={<AdminLayout />}>
+          <Route index element={<AdminHomePage />} />
+          <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+            <Route path="solicitacoes" element={<AccessRequestsPage />} />
+          </Route>
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
