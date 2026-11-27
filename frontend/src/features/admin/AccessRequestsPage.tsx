@@ -8,7 +8,6 @@ import {
 } from '../../services/admin';
 import type { AccessRequest, RequestStatus } from '../../types';
 import { Button } from '../../components/ui/Button';
-import { useAdminSession } from '../../hooks/useAdminSession';
 
 type AdminFilter = 'TODOS' | RequestStatus;
 
@@ -38,44 +37,8 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Não foi possível carregar as solicitações.';
 }
 
-export interface AdminPageProps {
-  onLogout: () => void;
-  onUnauthenticated: () => void;
-}
-
-export function AdminPage({ onLogout, onUnauthenticated }: AdminPageProps) {
-  const session = useAdminSession();
-
-  useEffect(() => {
-    if (session.status === 'unauthenticated') {
-      onUnauthenticated();
-    }
-  }, [onUnauthenticated, session.status]);
-
-  if (session.status === 'checking') return <StatusPanel message="Validando sua sessão..." />;
-  if (session.status === 'unauthenticated') {
-    return <StatusPanel message={session.error ?? 'Sua sessão expirou. Faça login novamente.'} />;
-  }
-  if (session.status === 'forbidden') {
-    return <StatusPanel message="Você não tem permissão para acessar esta área." />;
-  }
-  if (session.status === 'error') {
-    return <StatusPanel message={session.error ?? 'Não foi possível validar sua sessão.'} />;
-  }
-
-  async function handleLogout() {
-    try {
-      await session.logout();
-      onLogout();
-    } catch (error: unknown) {
-      window.alert(getErrorMessage(error));
-    }
-  }
-
-  return <AdminContent userName={session.user?.nome ?? ''} onLogout={() => void handleLogout()} />;
-}
-
-function AdminContent({ userName, onLogout }: { userName: string; onLogout: () => void }) {
+/** Tela de aprovação de contas (só SUPER_ADMIN). Aparece dentro do AdminLayout. */
+export function AccessRequestsPage() {
   const [filter, setFilter] = useState<AdminFilter>('PENDENTE');
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [selected, setSelected] = useState<AccessRequest | null>(null);
@@ -122,25 +85,8 @@ function AdminContent({ userName, onLogout }: { userName: string; onLogout: () =
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="bg-brand-gradient px-4 py-8 text-white sm:px-6">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-white/80">SMCELT</p>
-            <h1 className="mt-1 text-2xl font-bold">Painel Administrativo</h1>
-            <p className="mt-1 text-sm text-white/80">Olá, {userName}.</p>
-          </div>
-          <Button
-            variant="secondary"
-            className="border-white text-white hover:bg-white/10"
-            onClick={onLogout}
-          >
-            Sair
-          </Button>
-        </div>
-      </header>
-
-      <section className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+    <>
+      <section>
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold">Solicitações de acesso</h2>
@@ -240,7 +186,7 @@ function AdminContent({ userName, onLogout }: { userName: string; onLogout: () =
       </section>
 
       {selected ? <RequestDetails request={selected} onClose={() => setSelected(null)} /> : null}
-    </main>
+    </>
   );
 }
 
@@ -294,18 +240,5 @@ function Detail({ label, value }: { label: string; value: string }) {
       <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
       <dd className="mt-1 break-words text-sm text-slate-900">{value}</dd>
     </div>
-  );
-}
-
-function StatusPanel({ message }: { message: string }) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-      <div
-        className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
-        role="status"
-      >
-        <p className="text-slate-700">{message}</p>
-      </div>
-    </main>
   );
 }

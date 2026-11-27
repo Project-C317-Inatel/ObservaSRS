@@ -8,18 +8,16 @@ import type { UserRole } from './types';
 /** Papel da sessão simulada; `null` representa usuário anônimo. */
 const sessao = vi.hoisted(() => ({ papel: null as UserRole | null }));
 
-vi.mock('./features/admin/AdminPage', () => ({
-  AdminPage: (props: { onLogout: () => void; onUnauthenticated: () => void }) => (
-    <>
-      <p>Solicitações mockadas</p>
-      <button onClick={props.onLogout}>Sair mockado</button>
-      <button onClick={props.onUnauthenticated}>Sessão expirada mockada</button>
-    </>
-  ),
+vi.mock('./components/layout/AdminLayout', () => ({
+  AdminLayout: () => <Outlet />,
 }));
 
-vi.mock('./features/admin/AdminPlaceholderPage', () => ({
-  AdminPlaceholderPage: () => <p>Painel administrativo mockado</p>,
+vi.mock('./features/admin/AccessRequestsPage', () => ({
+  AccessRequestsPage: () => <p>Solicitações mockadas</p>,
+}));
+
+vi.mock('./features/admin/AdminHomePage', () => ({
+  AdminHomePage: () => <p>Painel administrativo mockado</p>,
 }));
 
 // Reproduz a regra real do ProtectedRoute para validar os papéis configurados em cada rota.
