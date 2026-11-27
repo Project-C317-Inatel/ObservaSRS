@@ -25,7 +25,7 @@ export function HeroSection({ metrics: explicitMetrics }: HeroSectionProps = {})
 
       <div className="relative mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
         <div>
-          <p className="inline-block rounded-full bg-data-yellow px-6 py-2 font-hand text-2xl font-bold text-brand-purple sm:text-3xl lg:text-2xl xl:text-3xl">
+          <p className="inline-block rounded-full bg-data-yellow px-6 py-2 font-hand text-xl font-bold text-brand-purple sm:text-2xl lg:text-xl xl:text-2xl">
             Cidade criativa · Cidade feliz
           </p>
 

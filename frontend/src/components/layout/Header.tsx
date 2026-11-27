@@ -5,7 +5,7 @@ import { COLETA_NAV, LOGIN_NAV, PUBLIC_NAV, type NavItem } from '../../routes';
 import { Logo } from '../ui/Logo';
 
 const baseLink =
-  'rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple';
+  'rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple';
 const activeLink = 'bg-brand-gradient text-white shadow-sm';
 const idleLink = 'text-slate-700 hover:bg-slate-100';
 
